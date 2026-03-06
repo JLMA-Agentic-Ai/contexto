@@ -1,0 +1,7 @@
+{
+  "extends": "../../../.claude-flow/config.yaml",
+  "metadata": {
+    "generatedBy": "start.sh",
+    "createdAt": "2026-03-05T09:32:37+00:00"
+  }
+}

@@ -1,0 +1,339 @@
+{
+  "agents": {
+    "agent-1772727086170-p8wu56": {
+      "agentId": "agent-1772727086170-p8wu56",
+      "agentType": "architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic",
+        "task": "Design contexto plugin architecture based on investigation report findings"
+      },
+      "createdAt": "2026-03-05T16:11:26.179Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "architect-contexto": {
+      "agentId": "architect-contexto",
+      "agentType": "architect",
+      "status": "active",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T16:52:39.448Z",
+      "domain": "contexto-architecture",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "coder-contexto": {
+      "agentId": "coder-contexto",
+      "agentType": "coder",
+      "status": "active",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T16:52:41.374Z",
+      "domain": "contexto-implementation",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "security-contexto": {
+      "agentId": "security-contexto",
+      "agentType": "security-architect",
+      "status": "active",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T16:52:42.853Z",
+      "domain": "contexto-security",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "performance-contexto": {
+      "agentId": "performance-contexto",
+      "agentType": "performance-engineer",
+      "status": "active",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T16:52:44.805Z",
+      "domain": "contexto-performance",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "memory-contexto": {
+      "agentId": "memory-contexto",
+      "agentType": "memory-specialist",
+      "status": "active",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T16:52:47.145Z",
+      "domain": "contexto-memory",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "tester-contexto": {
+      "agentId": "tester-contexto",
+      "agentType": "tester",
+      "status": "active",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T16:52:48.615Z",
+      "domain": "contexto-testing",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "researcher-contexto": {
+      "agentId": "researcher-contexto",
+      "agentType": "researcher",
+      "status": "active",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T16:52:50.498Z",
+      "domain": "contexto-research",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "coordinator-contexto": {
+      "agentId": "coordinator-contexto",
+      "agentType": "hierarchical-coordinator",
+      "status": "active",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "opus"
+      },
+      "createdAt": "2026-03-05T16:52:52.098Z",
+      "domain": "contexto-coordination",
+      "model": "opus",
+      "modelRoutedBy": "explicit"
+    },
+    "contexto-architect": {
+      "agentId": "contexto-architect",
+      "agentType": "architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T21:10:23.539Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "contexto-coder": {
+      "agentId": "contexto-coder",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T21:10:25.002Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "contexto-security": {
+      "agentId": "contexto-security",
+      "agentType": "security-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T21:10:26.437Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "contexto-performance": {
+      "agentId": "contexto-performance",
+      "agentType": "performance-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T21:10:27.866Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "contexto-memory": {
+      "agentId": "contexto-memory",
+      "agentType": "memory-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T21:10:29.334Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "contexto-tester": {
+      "agentId": "contexto-tester",
+      "agentType": "tester",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T21:10:30.788Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "contexto-coordinator": {
+      "agentId": "contexto-coordinator",
+      "agentType": "coordinator",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T21:10:31.805Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "contexto-researcher": {
+      "agentId": "contexto-researcher",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-05T21:10:32.692Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "agent-1772745811569-doiuh1": {
+      "agentId": "agent-1772745811569-doiuh1",
+      "agentType": "architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-05T21:23:31.569Z",
+      "model": "opus",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772745815473-3vmif1": {
+      "agentId": "agent-1772745815473-3vmif1",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-05T21:23:35.473Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772745819373-d3azna": {
+      "agentId": "agent-1772745819373-d3azna",
+      "agentType": "security-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-05T21:23:39.373Z",
+      "model": "opus",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772745823325-oru8nn": {
+      "agentId": "agent-1772745823325-oru8nn",
+      "agentType": "performance-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-05T21:23:43.325Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772745827323-yr5h1z": {
+      "agentId": "agent-1772745827323-yr5h1z",
+      "agentType": "memory-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-05T21:23:47.323Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772745831301-4shfx1": {
+      "agentId": "agent-1772745831301-4shfx1",
+      "agentType": "tester",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-05T21:23:51.301Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772745843450-bqb1jz": {
+      "agentId": "agent-1772745843450-bqb1jz",
+      "agentType": "coordinator",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-05T21:24:03.450Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772745847474-evhdyj": {
+      "agentId": "agent-1772745847474-evhdyj",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-05T21:24:07.474Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    }
+  },
+  "version": "3.0.0"
+}

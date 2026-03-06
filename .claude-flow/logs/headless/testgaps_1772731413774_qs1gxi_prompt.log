@@ -1,0 +1,1101 @@
+[2026-03-05T17:23:33.778Z] PROMPT
+============================================================
+Analyze test coverage and identify gaps:
+- Find untested functions and classes
+- Identify edge cases not covered
+- Suggest new test scenarios
+- Check for missing error handling tests
+- Identify integration test gaps
+
+For each gap, provide a test skeleton.
+
+## Codebase Context
+
+--- src/contexto/clients/rlmgw-client.ts (truncated) ---
+/**
+ * RLMgw Client - Integration with Recursive Language Models Gateway
+ *
+ * Provides intelligent context selection through RLM autonomous exploration
+ * Based on the production RLMgw implementation from base_projects/rlmgw
+ */
+
+import { Logger } from '@claude-flow/core';
+import axios, { AxiosInstance } from 'axios';
+
+export interface RLMgwConfig {
+  enabled: boolean;
+  endpoint: string;
+  maxExplorationTime: number;
+  feedbackIndexing: boolean;
+  maxInternalCalls?: number;
+  maxContextPackChars?: number;
+}
+
+export interface RLMgwResult {
+  context: string;
+  completeness: number;
+  confidence: number;
+  files: string[];
+  reasoning: string;
+  explorationTime: number;
+}
+
+export interface ProjectPattern {
+  pattern: string;
+  confidence: number;
+  files: string[];
+  description: string;
+}
+
+export class RLMgwClient {
+  private logger = new Logger('RLMgwClient');
+  private client: AxiosInstance;
+  private isHealthy = false;
+
+  constructor(private config: RLMgwConfig) {
+    this.client = axios.create({
+      baseURL: config.endpoint,
+      timeout: config.maxExplorationTime * 1000 + 5000, // Add 5s buffer
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'contexto-plugin/1.0.0'
+      }
+    });
+  }
+
+  async initialize(): Promise<void> {
+    if (!this.config.enabled) {
+      this.logger.info('RLMgw client disabled in configuration');
+      return;
+    }
+
+    try {
+      // Test connection to RLMgw
+      const response = await this.client.get('/readyz');
+      this.isHealthy = response.status === 200;
+
+      if (this.isHealthy) {
+        this.logger.info(`RLMgw client initialized successfully - endpoint: ${this.config.endpoint}`);
+      } else {
+        this.logger.warn(`RLMgw endpoint responded but may not be fully ready`);
+      }
+    } catch (error) {
+      this.logger.error('Failed to initialize RLMgw client:', error);
+      this.isHealthy = false;
+      // Don't throw - allow degraded operation
+    }
+  }
+
+  /**
+   * Explore repository context using RLM autonomous exploration
+   */
+  async explore(query: string, sessionId?: string): Promise<RLMgwResult> {
+    if (!this.config.enabled) {
+      throw new Error('RLMgw client is disabled');
+    }
+
+    if (!this.isHealthy) {
+      throw new Error('RLMgw client is not healthy');
+    }
+
+    const startTime = Date.now();
+
+    try {
+      // Build request in OpenAI-compatible format
+      const request = {
+        model: 'minimax-m2-1', // Default model for RLMgw
+        messages: [
+          {
+            role: 'user' as const,
+            content: query
+          }
+        ],
+        max_tokens: this.config.maxContextPackChars || 12000,
+        temperature: 0.1, // Low temperature for deterministic context selection
+        // Optional session management
+        ...(sessionId && { session_id: sessionId })
+      };
+
+      this.logger.debug('Sending exploration request to RLMgw', {
+        query: query.substring(0, 100) + '...',
+        sessionId
+      });
+
+      const response = await this.client.post('/v1/chat/completions', request);
+
+      if (response.status !== 200) {
+        throw new Error(`RLMgw returned status ${response.status}: ${response.statusText}`);
+      }
+
+      const explorationTime = Date.now() - startTime;
+
+      // Parse RLMgw response
+      const content = response.data.choices[0]?.message?.content || '';
+      const usage = response.data.usage || {};
+
+      // Extract context information from the response
+      // RLMgw includes file paths and reasoning in its responses
+      const result = this.parseRLMgwResponse(content, explorationTime);
+
+      this.logger.info(`RLMgw exploration completed`, {
+        explorationTime: `${explorationTime}ms`,
+        filesFound: result.files.length,
+        completeness: result.completeness,
+        tokens: usage.total_tokens
+      });
+
+      return result;
+
+    } catch (error) {
+      this.logger.error('RLMgw exploration failed:', error);
+
+      if (error.response) {
+        this.logger.error('RLMgw error response:', {
+          status: error.response.status,
+          data: error.response.data
+        });
+      }
+
+      throw new Error(`RLMgw exploration failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Analyze multiple projects to discover common patterns
+   * Inspired by ADW cross-project intelligence
+   */
+  async analyzeProjectPatterns(projectPaths: string[]): Promise<ProjectPattern[]> {
+    const patterns: ProjectPattern[] = [];
+
+    for (const projectPath of projectPaths) {
+      try {
+        const query = `Analyze the architecture and patterns in project: ${projectPath}. Focus on common patterns, structure, and key components.`;
+        const result = await this.explore(query);
+
+        // Extract patterns from the exploration result
+        const projectPatterns = this.extractPatternsFromResult(result, projectPath);
+        patterns.push(...projectPatterns);
+
+      } catch (error) {
+        this.logger.warn(`Failed to analyze project ${projectPath}:`, error);
+      
+
+--- src/contexto/clients/ruflo-v3-client.ts (truncated) ---
+/**
+ * Ruflo V3 Client - Integration with Claude-Flow V3 Memory and Intelligence
+ *
+ * Leverages existing Ruflo V3 infrastructure:
+ * - HNSW semantic search (<100ms)
+ * - 4-type memory system (episodic/semantic/procedural/working)
+ * - SONA learning + MoE routing
+ * - Hyperbolic Poincaré geometry indexing
+ */
+
+import { Logger } from '@claude-flow/core';
+
+export interface RufloV3Config {
+  enabled: boolean;
+  confidenceThreshold: number;
+  maxCacheAge: number;
+}
+
+export interface SemanticSearchResult {
+  context: string;
+  confidence: number;
+  completeness: number;
+  files: string[];
+  searchTime: number;
+  memoryType: 'episodic' | 'semantic' | 'procedural' | 'working';
+  namespace: string;
+}
+
+export interface MemoryStoreRequest {
+  key: string;
+  value: string;
+  namespace?: string;
+  tags?: string[];
+  ttl?: number;
+}
+
+declare global {
+  // Extend global with Claude-Flow MCP tools
+  var mcp__claude_flow__memory_search: (params: {
+    query: string;
+    namespace?: string;
+    limit?: number;
+    threshold?: number;
+  }) => Promise<{ results: any[]; metadata: any }>;
+
+  var mcp__claude_flow__memory_store: (params: {
+    key: string;
+    value: string;
+    namespace?: string;
+    tags?: string[];
+    ttl?: number;
+  }) => Promise<{ stored: boolean; key: string }>;
+
+  var mcp__claude_flow__embeddings_search: (params: {
+    query: string;
+    threshold?: number;
+    limit?: number;
+  }) => Promise<{ results: any[]; searchTime: number }>;
+
+  var mcp__claude_flow__neural_patterns: (params: {
+    input: string;
+    pattern_type?: string;
+  }) => Promise<{ patterns: any[]; confidence: number }>;
+}
+
+export class RufloV3Client {
+  private logger = new Logger('RufloV3Client');
+  private initialized = false;
+
+  constructor(private config: RufloV3Config) {}
+
+  async initialize(): Promise<void> {
+    if (!this.config.enabled) {
+      this.logger.info('Ruflo V3 client disabled in configuration');
+      return;
+    }
+
+    try {
+      // Verify MCP tools are available
+      if (typeof global.mcp__claude_flow__memory_search !== 'function') {
+        throw new Error('Claude-Flow memory MCP tools not available');
+      }
+
+      this.initialized = true;
+      this.logger.info('Ruflo V3 client initialized - MCP tools available');
+
+    } catch (error) {
+      this.logger.error('Failed to initialize Ruflo V3 client:', error);
+      this.initialized = false;
+    }
+  }
+
+  /**
+   * Perform semantic search using HNSW indexing
+   * Target: <100ms response time (from investigation report)
+   */
+  async semanticSearch(query: string, namespace?: string): Promise<SemanticSearchResult> {
+    if (!this.config.enabled || !this.initialized) {
+      throw new Error('Ruflo V3 client not available');
+    }
+
+    const startTime = Date.now();
+
+    try {
+      // Use MCP memory search with optimized parameters
+      const searchResult = await global.mcp__claude_flow__memory_search({
+        query,
+        namespace: namespace || 'contexto',
+        limit: 10,
+        threshold: this.config.confidenceThreshold
+      });
+
+      const searchTime = Date.now() - startTime;
+
+      if (!searchResult.results || searchResult.results.length === 0) {
+        return {
+          context: '',
+          confidence: 0,
+          completeness: 0,
+          files: [],
+          searchTime,
+          memoryType: 'semantic',
+          namespace: namespace || 'contexto'
+        };
+      }
+
+      // Process search results
+      const topResult = searchResult.results[0];
+      const allResults = searchResult.results;
+
+      // Calculate confidence based on similarity scores
+      const confidence = topResult.similarity || topResult.score || 0;
+
+      // Combine context from multiple results if confidence is high
+      let combinedContext = '';
+      let files: string[] = [];
+
+      if (confidence > this.config.confidenceThreshold) {
+        combinedContext = allResults
+          .slice(0, 5) // Top 5 results
+          .map(r => r.value || r.content || '')
+          .join('\\n\\n---\\n\\n');
+
+        files = allResults
+          .flatMap(r => r.files || [])
+          .filter((file, index, arr) => arr.indexOf(file) === index); // Unique files
+      } else {
+        combinedContext = topResult.value || topResult.content || '';
+        files = topResult.files || [];
+      }
+
+      // Calculate completeness based on result quality
+      const completeness = Math.min(0.95, // Cap at 95% for cached results
+        Math.max(0.3, confidence * 0.8 + (files.length / 10) * 0.2)
+      );
+
+      this.logger.info(`Ruflo V3 search completed`, {
+        searchTime: `${searchTime}ms`,
+        confidence: confidence.toFixed(2),
+        resultsCount: allResults.length,
+        filesCount: files.length
+      });
+
+      return {
+        context: combinedContext,
+        confidence,
+        completeness,
+        files,
+        searchTime,
+        memoryType: this.determineMemoryType(topResult),
+        namespace: namespace || 'contexto'
+      };
+
+    } catch (error) {
+      this.logger.error(
+
+--- src/contexto/config/plugin-config.ts ---
+/**
+ * Plugin Configuration - Default configuration inspired by ADW investigation report
+ */
+
+import { ContextoConfig } from '../plugin';
+
+export const defaultContextoConfig: ContextoConfig = {
+  name: 'contexto',
+  version: '1.0.0',
+  enabled: true,
+
+  // Hybrid configuration based on investigation findings
+  rufloV3: {
+    enabled: true,
+    confidenceThreshold: 0.4, // Route to RLMgw if below 40%
+    maxCacheAge: 86400 * 7, // 7 days
+  },
+
+  rlmgw: {
+    enabled: true,
+    endpoint: 'http://127.0.0.1:8010', // Default RLMgw endpoint
+    maxExplorationTime: 5000, // 5s target from investigation
+    feedbackIndexing: true, // Enable learning
+  },
+
+  // Performance targets from investigation report
+  performance: {
+    targetCachedResponseTime: 100, // <100ms
+    targetLiveResponseTime: 5000,   // <5s
+    targetCompleteness: 0.98,       // 98%+
+    targetCacheHitRate: 0.70,       // >70%
+  },
+
+  // Memory configuration
+  memory: {
+    namespaceStrategy: 'mixed', // Project + domain hybrid
+    persistentLearning: true,
+    crossSessionEnabled: true,
+  },
+};
+
+/**
+ * Validate configuration
+ */
+export function validateConfig(config: Partial<ContextoConfig>): ContextoConfig {
+  const merged = { ...defaultContextoConfig, ...config };
+
+  // Validate thresholds
+  if (merged.rufloV3.confidenceThreshold < 0 || merged.rufloV3.confidenceThreshold > 1) {
+    throw new Error('Ruflo V3 confidence threshold must be between 0 and 1');
+  }
+
+  if (merged.performance.targetCompleteness < 0 || merged.performance.targetCompleteness > 1) {
+    throw new Error('Target completeness must be between 0 and 1');
+  }
+
+  if (merged.performance.targetCacheHitRate < 0 || merged.performance.targetCacheHitRate > 1) {
+    throw new Error('Target cache hit rate must be between 0 and 1');
+  }
+
+  // Validate timeouts
+  if (merged.rlmgw.maxExplorationTime < 1000) {
+    throw new Error('RLMgw max exploration time must be at least 1000ms');
+  }
+
+  return merged;
+}
+
+/**
+ * Load configuration from environment variables
+ */
+export function loadConfigFromEnv(): Partial<ContextoConfig> {
+  return {
+    rufloV3: {
+      enabled: process.env.CONTEXTO_RUFLO_V3_ENABLED !== 'false',
+      confidenceThreshold: parseFloat(process.env.CONTEXTO_CONFIDENCE_THRESHOLD || '0.4'),
+      maxCacheAge: parseInt(process.env.CONTEXTO_CACHE_MAX_AGE || '604800'), // 7 days
+    },
+
+    rlmgw: {
+      enabled: process.env.CONTEXTO_RLMGW_ENABLED !== 'false',
+      endpoint: process.env.CONTEXTO_RLMGW_ENDPOINT || 'http://127.0.0.1:8010',
+      maxExplorationTime: parseInt(process.env.CONTEXTO_MAX_EXPLORATION_TIME || '5000'),
+      feedbackIndexing: process.env.CONTEXTO_FEEDBACK_INDEXING !== 'false',
+    },
+
+    performance: {
+      targetCachedResponseTime: parseInt(process.env.CONTEXTO_TARGET_CACHED_TIME || '100'),
+      targetLiveResponseTime: parseInt(process.env.CONTEXTO_TARGET_LIVE_TIME || '5000'),
+      targetCompleteness: parseFloat(process.env.CONTEXTO_TARGET_COMPLETENESS || '0.98'),
+      targetCacheHitRate: parseFloat(process.env.CONTEXTO_TARGET_CACHE_HIT_RATE || '0.70'),
+    },
+
+    memory: {
+      namespaceStrategy: (process.env.CONTEXTO_NAMESPACE_STRATEGY as any) || 'mixed',
+      persistentLearning: process.env.CONTEXTO_PERSISTENT_LEARNING !== 'false',
+      crossSessionEnabled: process.env.CONTEXTO_CROSS_SESSION !== 'false',
+    },
+  };
+}
+
+
+--- src/contexto/memory/memory-integration.ts (truncated) ---
+/**
+ * Memory Integration - Advanced memory patterns for cross-session learning
+ *
+ * Implements sophisticated memory management inspired by ADW skills:
+ * - Feedback indexing (RLMgw results → Ruflo V3)
+ * - Cross-project pattern recognition
+ * - Adaptive namespace organization
+ * - Persistent learning optimization
+ */
+
+import { Logger } from '@claude-flow/core';
+import { RLMgwResult } from '../clients/rlmgw-client';
+import { RufloV3Client, MemoryStoreRequest } from '../clients/ruflo-v3-client';
+
+export interface MemoryConfig {
+  namespaceStrategy: 'project' | 'domain' | 'mixed';
+  persistentLearning: boolean;
+  crossSessionEnabled: boolean;
+}
+
+export interface LearningPattern {
+  pattern: string;
+  frequency: number;
+  confidence: number;
+  contexts: string[];
+  lastSeen: Date;
+}
+
+export interface MemoryNamespace {
+  name: string;
+  description: string;
+  entryCount: number;
+  averageConfidence: number;
+}
+
+export class MemoryIntegration {
+  private logger = new Logger('MemoryIntegration');
+  private rufloClient?: RufloV3Client;
+  private learningPatterns = new Map<string, LearningPattern>();
+  private namespaceStats = new Map<string, MemoryNamespace>();
+
+  constructor(private config: MemoryConfig) {}
+
+  async initialize(): Promise<void> {
+    this.logger.info('Memory integration initializing', { config: this.config });
+
+    if (this.config.persistentLearning) {
+      await this.loadExistingPatterns();
+    }
+
+    this.logger.info('Memory integration ready');
+  }
+
+  /**
+   * Set Ruflo V3 client for memory operations
+   */
+  setRufloClient(client: RufloV3Client): void {
+    this.rufloClient = client;
+  }
+
+  /**
+   * Index RLMgw exploration results into Ruflo V3 memory
+   * This enables cross-session learning and improves cache hit rates
+   */
+  async indexRLMgwResults(result: RLMgwResult, originalQuery: string): Promise<void> {
+    if (!this.rufloClient) {
+      this.logger.warn('Ruflo V3 client not available for indexing');
+      return;
+    }
+
+    try {
+      // Generate memory key based on query and context
+      const memoryKey = this.generateMemoryKey(originalQuery, result);
+
+      // Determine namespace using configured strategy
+      const namespace = this.determineNamespace(originalQuery, result);
+
+      // Create comprehensive memory entry
+      const memoryEntry: MemoryStoreRequest = {
+        key: memoryKey,
+        value: this.buildContextValue(result, originalQuery),
+        namespace,
+        tags: this.generateTags(result, originalQuery),
+        ttl: this.calculateTTL(result.confidence)
+      };
+
+      // Store in Ruflo V3 memory
+      await this.rufloClient.storeContext(memoryEntry);
+
+      // Update learning patterns
+      if (this.config.persistentLearning) {
+        await this.updateLearningPatterns(originalQuery, result);
+      }
+
+      // Update namespace statistics
+      this.updateNamespaceStats(namespace, result.confidence);
+
+      this.logger.info('Successfully indexed RLMgw result', {
+        key: memoryKey,
+        namespace,
+        confidence: result.confidence,
+        filesCount: result.files.length
+      });
+
+    } catch (error) {
+      this.logger.error('Failed to index RLMgw result:', error);
+    }
+  }
+
+  /**
+   * Store project patterns discovered through cross-project analysis
+   */
+  async storeProjectPatterns(patterns: any[]): Promise<void> {
+    if (!this.rufloClient) {
+      return;
+    }
+
+    const requests: MemoryStoreRequest[] = patterns.map(pattern => ({
+      key: `pattern-${pattern.pattern.toLowerCase().replace(/\\s+/g, '-')}`,
+      value: JSON.stringify(pattern),
+      namespace: 'architecture-patterns',
+      tags: ['pattern', 'cross-project', 'architecture'],
+      ttl: 86400 * 30 // 30 days for patterns
+    }));
+
+    await this.rufloClient.batchStoreContext(requests);
+
+    this.logger.info(`Stored ${patterns.length} project patterns`);
+  }
+
+  /**
+   * Optimize memory organization based on usage patterns
+   */
+  async optimizeNamespaces(): Promise<void> {
+    if (!this.config.persistentLearning) {
+      return;
+    }
+
+    // Analyze namespace effectiveness
+    const stats = Array.from(this.namespaceStats.values());
+
+    // Identify underperforming namespaces
+    const lowPerformingNamespaces = stats.filter(
+      ns => ns.entryCount > 50 && ns.averageConfidence < 0.6
+    );
+
+    if (lowPerformingNamespaces.length > 0) {
+      this.logger.info('Detected underperforming namespaces', {
+        count: lowPerformingNamespaces.length,
+        namespaces: lowPerformingNamespaces.map(ns => ns.name)
+      });
+
+      // In a full implementation, this would:
+      // 1. Re-categorize memory entries
+      // 2. Merge similar namespaces
+      // 3. Split large namespaces by domain
+      // 4. Update namespace strategy
+    }
+
+    // Identify high-performing patterns
+    const topPatterns = Array.from(this.learningPatterns.values())
+      .sort((a, b) => b.frequency * b.confidence - a.frequency * a.confidence)
+      .slice(0, 10);
+
+    this.logger.info('Top learning patterns
+
+--- src/contexto/monitoring/performance-monitor.ts (truncated) ---
+/**
+ * Performance Monitor - Real-time performance tracking and optimization
+ *
+ * Tracks ADW-defined performance targets:
+ * - <100ms cached responses
+ * - <5s live exploration
+ * - 98%+ context completeness
+ * - >70% cache hit rate
+ */
+
+import { Logger } from '@claude-flow/core';
+
+export interface PerformanceTargets {
+  targetCachedResponseTime: number; // <100ms
+  targetLiveResponseTime: number;   // <5s
+  targetCompleteness: number;       // 98%+
+  targetCacheHitRate: number;       // >70%
+}
+
+export interface PerformanceMetrics {
+  cacheHitRate: number;
+  averageResponseTime: number;
+  contextCompleteness: number;
+  errorRate: number;
+  throughput: number; // requests per second
+
+  // Detailed breakdowns
+  cached: { count: number; avgTime: number; };
+  live: { count: number; avgTime: number; };
+  errors: { count: number; types: Record<string, number>; };
+}
+
+export interface PerformanceEvent {
+  type: 'cache_hit' | 'live_exploration' | 'error' | 'optimization';
+  timestamp: number;
+  duration: number;
+  metadata: any;
+}
+
+export class PerformanceMonitor {
+  private logger = new Logger('PerformanceMonitor');
+  private events: PerformanceEvent[] = [];
+  private metrics: PerformanceMetrics;
+  private startTime = Date.now();
+
+  constructor(private targets: PerformanceTargets) {
+    this.metrics = this.initializeMetrics();
+  }
+
+  async initialize(): Promise<void> {
+    this.logger.info('Performance monitor initialized', { targets: this.targets });
+
+    // Start periodic metrics calculation
+    setInterval(() => this.calculateMetrics(), 10000); // Every 10 seconds
+  }
+
+  /**
+   * Record cache hit performance
+   */
+  recordCacheHit(responseTime: number): void {
+    this.events.push({
+      type: 'cache_hit',
+      timestamp: Date.now(),
+      duration: responseTime,
+      metadata: { target: this.targets.targetCachedResponseTime }
+    });
+
+    // Alert if target exceeded
+    if (responseTime > this.targets.targetCachedResponseTime) {
+      this.logger.warn(`Cache hit exceeded target: ${responseTime}ms > ${this.targets.targetCachedResponseTime}ms`);
+    }
+  }
+
+  /**
+   * Record live exploration performance
+   */
+  recordLiveExploration(responseTime: number): void {
+    this.events.push({
+      type: 'live_exploration',
+      timestamp: Date.now(),
+      duration: responseTime,
+      metadata: { target: this.targets.targetLiveResponseTime }
+    });
+
+    // Alert if target exceeded
+    if (responseTime > this.targets.targetLiveResponseTime) {
+      this.logger.warn(`Live exploration exceeded target: ${responseTime}ms > ${this.targets.targetLiveResponseTime}ms`);
+    }
+  }
+
+  /**
+   * Record error events
+   */
+  recordError(error: Error, context: string): void {
+    this.events.push({
+      type: 'error',
+      timestamp: Date.now(),
+      duration: 0,
+      metadata: {
+        error: error.message,
+        context,
+        stack: error.stack
+      }
+    });
+
+    this.logger.error('Performance event - error recorded', { error: error.message, context });
+  }
+
+  /**
+   * Get current performance metrics
+   */
+  async getCurrentMetrics(): Promise<PerformanceMetrics> {
+    this.calculateMetrics();
+    return { ...this.metrics };
+  }
+
+  /**
+   * Calculate performance metrics from events
+   */
+  private calculateMetrics(): void {
+    const now = Date.now();
+    const windowMs = 60000; // 1 minute window
+    const recentEvents = this.events.filter(e => now - e.timestamp <= windowMs);
+
+    if (recentEvents.length === 0) {
+      return; // No events to process
+    }
+
+    // Cache hits
+    const cacheHits = recentEvents.filter(e => e.type === 'cache_hit');
+    const cacheHitTimes = cacheHits.map(e => e.duration);
+
+    // Live explorations
+    const liveEvents = recentEvents.filter(e => e.type === 'live_exploration');
+    const liveTimes = liveEvents.map(e => e.duration);
+
+    // Errors
+    const errors = recentEvents.filter(e => e.type === 'error');
+    const errorTypes: Record<string, number> = {};
+    errors.forEach(e => {
+      const errorType = e.metadata.error || 'unknown';
+      errorTypes[errorType] = (errorTypes[errorType] || 0) + 1;
+    });
+
+    // Calculate aggregated metrics
+    const totalRequests = cacheHits.length + liveEvents.length;
+    const totalErrors = errors.length;
+
+    this.metrics = {
+      cacheHitRate: totalRequests > 0 ? cacheHits.length / totalRequests : 0,
+      averageResponseTime: this.average([...cacheHitTimes, ...liveTimes]),
+      contextCompleteness: 0.95, // Would be calculated from actual context quality
+      errorRate: (totalRequests + totalErrors) > 0 ? totalErrors / (totalRequests + totalErrors) : 0,
+      throughput: totalRequests / (windowMs / 1000), // requests per second
+
+      cached: {
+        count: cacheHits.length,
+        avgTime: this.average(cacheHitTimes)
+      },
+      live: {
+        count: liveEvents.length,
+        avgTime: this.average(liveTimes)
+      },
+      errors: {
+        count: errors.length,
+        types: errorTypes
+      }
+    };
+
+    // Check targets and lo
+
+--- src/contexto/plugin.ts (truncated) ---
+/**
+ * Contexto Plugin - RLMgw Evolution for Ruflo V3
+ *
+ * Inspired by ADW Skills architecture, this plugin provides:
+ * - 98%+ context completeness through hybrid Ruflo V3 + RLMgw
+ * - <100ms cached responses via HNSW semantic search
+ * - <5s live exploration via RLMgw autonomous discovery
+ * - Cross-session learning with persistent memory
+ */
+
+import { Plugin, PluginConfig, ContextRequest, ContextResponse } from '@claude-flow/core';
+import { RufloV3Client } from './clients/ruflo-v3-client';
+import { RLMgwClient } from './clients/rlmgw-client';
+import { ContextRouter } from './routing/context-router';
+import { MemoryIntegration } from './memory/memory-integration';
+import { PerformanceMonitor } from './monitoring/performance-monitor';
+
+export interface ContextoConfig extends PluginConfig {
+  // Hybrid configuration
+  rufloV3: {
+    enabled: boolean;
+    confidenceThreshold: number; // Route to RLMgw if below this
+    maxCacheAge: number;
+  };
+
+  rlmgw: {
+    enabled: boolean;
+    endpoint: string;
+    maxExplorationTime: number;
+    feedbackIndexing: boolean; // Feed results back to Ruflo V3
+  };
+
+  // Performance targets (from investigation report)
+  performance: {
+    targetCachedResponseTime: number; // <100ms
+    targetLiveResponseTime: number;   // <5s
+    targetCompleteness: number;       // 98%+
+    targetCacheHitRate: number;       // >70%
+  };
+
+  // Memory configuration
+  memory: {
+    namespaceStrategy: 'project' | 'domain' | 'mixed';
+    persistentLearning: boolean;
+    crossSessionEnabled: boolean;
+  };
+}
+
+export class ContextoPlugin extends Plugin {
+  private rufloClient: RufloV3Client;
+  private rlmgwClient: RLMgwClient;
+  private router: ContextRouter;
+  private memory: MemoryIntegration;
+  private monitor: PerformanceMonitor;
+
+  constructor(private config: ContextoConfig) {
+    super('contexto', '1.0.0');
+
+    this.rufloClient = new RufloV3Client(config.rufloV3);
+    this.rlmgwClient = new RLMgwClient(config.rlmgw);
+    this.router = new ContextRouter(config);
+    this.memory = new MemoryIntegration(config.memory);
+    this.monitor = new PerformanceMonitor(config.performance);
+  }
+
+  async initialize(): Promise<void> {
+    await Promise.all([
+      this.rufloClient.initialize(),
+      this.rlmgwClient.initialize(),
+      this.memory.initialize(),
+      this.monitor.initialize()
+    ]);
+
+    this.logger.info('Contexto plugin initialized - hybrid Ruflo V3 + RLMgw ready');
+  }
+
+  /**
+   * Main context delivery endpoint
+   * Implements the optimal hybrid architecture from investigation report
+   */
+  async getContext(request: ContextRequest): Promise<ContextResponse> {
+    const startTime = Date.now();
+
+    try {
+      // Step 1: Try Ruflo V3 semantic search (fast path)
+      const rufloResult = await this.rufloClient.semanticSearch(request.query);
+
+      if (rufloResult.confidence > this.config.rufloV3.confidenceThreshold) {
+        // High confidence - return cached result
+        const response = this.createResponse(rufloResult, 'cached', startTime);
+        this.monitor.recordCacheHit(response.metadata.responseTime);
+        return response;
+      }
+
+      // Step 2: Low confidence - use RLMgw exploration
+      this.logger.info(`Low confidence (${rufloResult.confidence}), routing to RLMgw`);
+      const rlmgwResult = await this.rlmgwClient.explore(request.query);
+
+      // Step 3: Feed back to Ruflo V3 for learning (if enabled)
+      if (this.config.rlmgw.feedbackIndexing) {
+        await this.memory.indexRLMgwResults(rlmgwResult, request.query);
+      }
+
+      const response = this.createResponse(rlmgwResult, 'live', startTime);
+      this.monitor.recordLiveExploration(response.metadata.responseTime);
+      return response;
+
+    } catch (error) {
+      this.logger.error('Context delivery failed:', error);
+      return this.createErrorResponse(error, startTime);
+    }
+  }
+
+  /**
+   * ADW-inspired batch context processing
+   * For handling multiple context requests efficiently
+   */
+  async getBatchContext(requests: ContextRequest[]): Promise<ContextResponse[]> {
+    // Parallel processing with smart batching
+    const batchResults = await Promise.allSettled(
+      requests.map(req => this.getContext(req))
+    );
+
+    return batchResults.map(result =>
+      result.status === 'fulfilled' ? result.value : this.createErrorResponse(result.reason)
+    );
+  }
+
+  /**
+   * Cross-project context discovery inspired by ADW skills
+   */
+  async discoverProjectPatterns(projectPaths: string[]): Promise<void> {
+    const patterns = await this.rlmgwClient.analyzeProjectPatterns(projectPaths);
+    await this.memory.storeProjectPatterns(patterns);
+    this.logger.info(`Discovered and stored patterns for ${projectPaths.length} projects`);
+  }
+
+  /**
+   * Performance optimization inspired by ADW methodology
+   */
+  async optimizePerformance(): Promise<void> {
+    const metrics = await this.monitor.getCurrentMetrics();
+
+    if (metrics.cacheHitRate < this.config.performance.targetCacheHitRate) {
+      // Adjust
+
+--- src/contexto/routing/context-router.ts (truncated) ---
+/**
+ * Context Router - Smart routing between Ruflo V3 and RLMgw
+ *
+ * Implements evidence-based routing logic from investigation report:
+ * - High confidence (>60% similarity) → Ruflo V3 cached result
+ * - Low confidence (<40%) → RLMgw live exploration
+ * - Adaptive threshold tuning based on performance metrics
+ */
+
+import { ContextoConfig } from '../plugin';
+import { Logger } from '@claude-flow/core';
+
+export interface RoutingDecision {
+  useRufloV3: boolean;
+  useRLMgw: boolean;
+  confidence: number;
+  reasoning: string;
+}
+
+export interface PerformanceMetrics {
+  cacheHitRate: number;
+  averageResponseTime: number;
+  contextCompleteness: number;
+  errorRate: number;
+}
+
+export class ContextRouter {
+  private logger = new Logger('ContextRouter');
+  private confidenceThreshold: number;
+  private adaptiveThresholdEnabled: boolean;
+
+  constructor(private config: ContextoConfig) {
+    this.confidenceThreshold = config.rufloV3.confidenceThreshold;
+    this.adaptiveThresholdEnabled = true;
+  }
+
+  /**
+   * Make routing decision based on query characteristics and confidence
+   */
+  async route(query: string, rufloConfidence?: number): Promise<RoutingDecision> {
+    // If Ruflo V3 is disabled, always use RLMgw
+    if (!this.config.rufloV3.enabled) {
+      return {
+        useRufloV3: false,
+        useRLMgw: true,
+        confidence: 0,
+        reasoning: 'Ruflo V3 disabled in configuration'
+      };
+    }
+
+    // If RLMgw is disabled, always use Ruflo V3
+    if (!this.config.rlmgw.enabled) {
+      return {
+        useRufloV3: true,
+        useRLMgw: false,
+        confidence: rufloConfidence || 0,
+        reasoning: 'RLMgw disabled in configuration'
+      };
+    }
+
+    // If we have Ruflo confidence, use it for decision
+    if (rufloConfidence !== undefined) {
+      if (rufloConfidence > this.confidenceThreshold) {
+        return {
+          useRufloV3: true,
+          useRLMgw: false,
+          confidence: rufloConfidence,
+          reasoning: `High confidence (${rufloConfidence.toFixed(2)}) above threshold (${this.confidenceThreshold})`
+        };
+      } else {
+        return {
+          useRufloV3: false,
+          useRLMgw: true,
+          confidence: rufloConfidence,
+          reasoning: `Low confidence (${rufloConfidence.toFixed(2)}) below threshold (${this.confidenceThreshold})`
+        };
+      }
+    }
+
+    // Analyze query characteristics for initial routing
+    const queryCharacteristics = this.analyzeQuery(query);
+
+    if (queryCharacteristics.isExploratoryQuery) {
+      return {
+        useRufloV3: false,
+        useRLMgw: true,
+        confidence: 0,
+        reasoning: 'Exploratory query detected - requires live exploration'
+      };
+    }
+
+    if (queryCharacteristics.isSpecificQuery) {
+      return {
+        useRufloV3: true,
+        useRLMgw: false,
+        confidence: 0.8, // Assume high confidence for specific queries
+        reasoning: 'Specific query detected - likely in cache'
+      };
+    }
+
+    // Default: try Ruflo V3 first
+    return {
+      useRufloV3: true,
+      useRLMgw: false,
+      confidence: 0.5,
+      reasoning: 'Default routing to Ruflo V3 for initial attempt'
+    };
+  }
+
+  /**
+   * Adaptive threshold adjustment based on performance metrics
+   * Inspired by ADW evidence-based optimization
+   */
+  async adjustConfidenceThreshold(metrics: PerformanceMetrics): Promise<void> {
+    if (!this.adaptiveThresholdEnabled) return;
+
+    const oldThreshold = this.confidenceThreshold;
+
+    // If cache hit rate is too low, lower threshold (more aggressive caching)
+    if (metrics.cacheHitRate < this.config.performance.targetCacheHitRate) {
+      this.confidenceThreshold = Math.max(0.3, this.confidenceThreshold - 0.05);
+      this.logger.info(`Lowered confidence threshold: ${oldThreshold} → ${this.confidenceThreshold} (cache hit rate: ${metrics.cacheHitRate})`);
+    }
+
+    // If cache hit rate is too high but completeness is low, raise threshold
+    if (metrics.cacheHitRate > 0.8 && metrics.contextCompleteness < this.config.performance.targetCompleteness) {
+      this.confidenceThreshold = Math.min(0.8, this.confidenceThreshold + 0.05);
+      this.logger.info(`Raised confidence threshold: ${oldThreshold} → ${this.confidenceThreshold} (completeness: ${metrics.contextCompleteness})`);
+    }
+
+    // If error rate is high, be more conservative (higher threshold)
+    if (metrics.errorRate > 0.05) {
+      this.confidenceThreshold = Math.min(0.8, this.confidenceThreshold + 0.1);
+      this.logger.warn(`Raised confidence threshold due to high error rate: ${oldThreshold} → ${this.confidenceThreshold} (error rate: ${metrics.errorRate})`);
+    }
+  }
+
+  /**
+   * Analyze query to determine routing strategy
+   */
+  private analyzeQuery(query: string): {
+    isExploratoryQuery: boolean;
+    isSpecificQuery: boolean;
+    complexity: 'low' | 'medium' | 'high';
+  } {
+    const exploratoryKeywords = [
+      'find', 'search', 'explore', 'discover', 'what', 'how', 'why', 'where',
+      'list all', 'show me', 'overv
+
+## Instructions
+
+Analyze the above codebase context and provide your response following the format specified in the task.

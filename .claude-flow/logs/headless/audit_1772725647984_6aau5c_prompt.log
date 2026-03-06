@@ -1,0 +1,1924 @@
+[2026-03-05T15:47:28.052Z] PROMPT
+============================================================
+Analyze this codebase for security vulnerabilities:
+- Check for hardcoded secrets (API keys, passwords)
+- Identify SQL injection risks
+- Find XSS vulnerabilities
+- Check for insecure dependencies
+- Identify authentication/authorization issues
+
+Provide a JSON report with:
+{
+  "vulnerabilities": [{ "severity": "high|medium|low", "file": "...", "line": N, "description": "..." }],
+  "riskScore": 0-100,
+  "recommendations": ["..."]
+}
+
+## Codebase Context
+
+--- base_projects/gcc/GCC/bin/aline-mcp.js ---
+#!/usr/bin/env node
+
+import { spawn, execSync } from "child_process";
+import { platform } from "os";
+
+const isWindows = platform() === "win32";
+
+function checkUvxInstalled() {
+  try {
+    execSync(isWindows ? "where uvx" : "which uvx", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function installUv() {
+  console.error("Installing uv (Python package manager)...");
+  try {
+    if (isWindows) {
+      execSync("powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"", {
+        stdio: "inherit",
+      });
+    } else {
+      execSync("curl -LsSf https://astral.sh/uv/install.sh | sh", {
+        stdio: "inherit",
+        shell: true,
+      });
+    }
+    // Add to PATH for current session
+    const homeDir = process.env.HOME || process.env.USERPROFILE;
+    if (!isWindows) {
+      process.env.PATH = `${homeDir}/.local/bin:${process.env.PATH}`;
+    }
+    return true;
+  } catch (err) {
+    console.error("Failed to install uv:", err.message);
+    return false;
+  }
+}
+
+async function main() {
+  console.error("[aline-ai npm wrapper] Starting...");
+
+  // Check if uvx is available, install if not
+  if (!checkUvxInstalled()) {
+    console.error("uvx not found. Attempting automatic installation...");
+    if (!installUv()) {
+      console.error("\nPlease install uv manually:");
+      console.error("  curl -LsSf https://astral.sh/uv/install.sh | sh");
+      process.exit(1);
+    }
+    console.error("uv installed successfully!\n");
+  }
+
+  // Run aline-mcp via uvx
+  const uvxCommand = isWindows ? "uvx.cmd" : "uvx";
+  // Use --refresh to ensure latest version is downloaded
+  const args = ["--refresh", "--from", "aline-ai", "aline-mcp", ...process.argv.slice(2)];
+
+  console.error(`[aline-ai npm wrapper] Running: ${uvxCommand} ${args.join(" ")}`);
+
+  const child = spawn(uvxCommand, args, {
+    stdio: "inherit",
+    shell: isWindows,
+    env: process.env,
+  });
+
+  child.on("error", (err) => {
+    if (err.code === "ENOENT") {
+      console.error("Error: uvx still not found after installation.");
+      console.error("Please restart your terminal and try again.");
+      process.exit(1);
+    }
+    console.error("Error spawning uvx:", err.message);
+    process.exit(1);
+  });
+
+  child.on("exit", (code) => {
+    process.exit(code ?? 0);
+  });
+}
+
+main();
+
+
+--- base_projects/rlmgw/docs/next.config.js ---
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  basePath: '/rlm',
+  trailingSlash: true,
+  images: { unoptimized: true },
+};
+
+module.exports = nextConfig;
+
+
+
+--- base_projects/rlmgw/docs/postcss.config.js ---
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+
+
+
+--- base_projects/rlmgw/docs/src/lib/utils.ts ---
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+
+--- base_projects/rlmgw/docs/tailwind.config.ts ---
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
+    },
+  },
+  plugins: [],
+};
+export default config;
+
+
+
+--- base_projects/rlmgw/visualizer/next.config.ts ---
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+
+
+--- base_projects/rlmgw/visualizer/src/lib/parse-logs.ts (truncated) ---
+import { RLMIteration, RLMLogFile, LogMetadata, RLMConfigMetadata, extractFinalAnswer } from './types';
+
+// Extract the context variable from code block locals
+export function extractContextVariable(iterations: RLMIteration[]): string | null {
+  for (const iter of iterations) {
+    for (const block of iter.code_blocks) {
+      if (block.result?.locals?.context) {
+        const ctx = block.result.locals.context;
+        if (typeof ctx === 'string') {
+          return ctx;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// Default config when metadata is not present (backwards compatibility)
+function getDefaultConfig(): RLMConfigMetadata {
+  return {
+    root_model: null,
+    max_depth: null,
+    max_iterations: null,
+    backend: null,
+    backend_kwargs: null,
+    environment_type: null,
+    environment_kwargs: null,
+    other_backends: null,
+  };
+}
+
+export interface ParsedJSONL {
+  iterations: RLMIteration[];
+  config: RLMConfigMetadata;
+}
+
+export function parseJSONL(content: string): ParsedJSONL {
+  const lines = content.trim().split('\n').filter(line => line.trim());
+  const iterations: RLMIteration[] = [];
+  let config: RLMConfigMetadata = getDefaultConfig();
+  
+  for (const line of lines) {
+    try {
+      const parsed = JSON.parse(line);
+      
+      // Check if this is a metadata entry
+      if (parsed.type === 'metadata') {
+        config = {
+          root_model: parsed.root_model ?? null,
+          max_depth: parsed.max_depth ?? null,
+          max_iterations: parsed.max_iterations ?? null,
+          backend: parsed.backend ?? null,
+          backend_kwargs: parsed.backend_kwargs ?? null,
+          environment_type: parsed.environment_type ?? null,
+          environment_kwargs: parsed.environment_kwargs ?? null,
+          other_backends: parsed.other_backends ?? null,
+        };
+      } else {
+        // This is an iteration entry
+        iterations.push(parsed as RLMIteration);
+      }
+    } catch (e) {
+      console.error('Failed to parse line:', line, e);
+    }
+  }
+  
+  return { iterations, config };
+}
+
+export function extractContextQuestion(iterations: RLMIteration[]): string {
+  if (iterations.length === 0) return 'No context found';
+  
+  const firstIteration = iterations[0];
+  const prompt = firstIteration.prompt;
+  
+  // Look for user message that contains the actual question
+  for (const msg of prompt) {
+    if (msg.role === 'user' && msg.content) {
+      // Try to extract quoted query
+      const queryMatch = msg.content.match(/original query: "([^"]+)"/);
+      if (queryMatch) {
+        return queryMatch[1];
+      }
+      
+      // Check if it contains the actual query pattern
+      if (msg.content.includes('answer the prompt')) {
+        continue;
+      }
+      
+      // Take first substantial user message
+      if (msg.content.length > 50 && msg.content.length < 500) {
+        return msg.content.slice(0, 200) + (msg.content.length > 200 ? '...' : '');
+      }
+    }
+  }
+  
+  // Fallback: look in system prompt for context info
+  const systemMsg = prompt.find(m => m.role === 'system');
+  if (systemMsg?.content) {
+    const contextMatch = systemMsg.content.match(/context variable.*?:(.*?)(?:\n|$)/i);
+    if (contextMatch) {
+      return contextMatch[1].trim().slice(0, 200);
+    }
+  }
+  
+  // Check code block output for actual context
+  for (const iter of iterations) {
+    for (const block of iter.code_blocks) {
+      if (block.result?.locals?.context) {
+        const ctx = block.result.locals.context;
+        if (typeof ctx === 'string' && ctx.length < 500) {
+          return ctx;
+        }
+      }
+    }
+  }
+  
+  return 'Context available in REPL environment';
+}
+
+export function computeMetadata(iterations: RLMIteration[]): LogMetadata {
+  let totalCodeBlocks = 0;
+  let totalSubLMCalls = 0;
+  let totalExecutionTime = 0;
+  let hasErrors = false;
+  let finalAnswer: string | null = null;
+  
+  for (const iter of iterations) {
+    totalCodeBlocks += iter.code_blocks.length;
+    
+    // Use iteration_time if available, otherwise sum code block times
+    if (iter.iteration_time != null) {
+      totalExecutionTime += iter.iteration_time;
+    } else {
+      for (const block of iter.code_blocks) {
+        if (block.result) {
+          totalExecutionTime += block.result.execution_time || 0;
+        }
+      }
+    }
+    
+    for (const block of iter.code_blocks) {
+      if (block.result) {
+        if (block.result.stderr) {
+          hasErrors = true;
+        }
+        if (block.result.rlm_calls) {
+          totalSubLMCalls += block.result.rlm_calls.length;
+        }
+      }
+    }
+    
+    if (iter.final_answer) {
+      finalAnswer = extractFinalAnswer(iter.final_answer);
+    }
+  }
+  
+  return {
+    totalIterations: iterations.length,
+    totalCodeBlocks,
+    totalSubLMCalls,
+    contextQuestion: extractContextQuestion(iterations),
+    finalAnswer,
+    totalExecutionTime,
+    hasErrors,
+  };
+}
+
+export function parseLogFile(fileName: string, content: string): RLMLogFile {
+  const { iterations, config } = p
+
+--- base_projects/rlmgw/visualizer/src/lib/types.ts ---
+// Types matching the RLM log format
+
+export interface RLMChatCompletion {
+  prompt: string | Record<string, unknown>;
+  response: string;
+  prompt_tokens: number;
+  completion_tokens: number;
+  execution_time: number;
+}
+
+export interface REPLResult {
+  stdout: string;
+  stderr: string;
+  locals: Record<string, unknown>;
+  execution_time: number;
+  rlm_calls: RLMChatCompletion[];
+}
+
+export interface CodeBlock {
+  code: string;
+  result: REPLResult;
+}
+
+export interface RLMIteration {
+  type?: string;
+  iteration: number;
+  timestamp: string;
+  prompt: Array<{ role: string; content: string }>;
+  response: string;
+  code_blocks: CodeBlock[];
+  final_answer: string | [string, string] | null;
+  iteration_time: number | null;
+}
+
+// Metadata saved at the start of a log file about RLM configuration
+export interface RLMConfigMetadata {
+  root_model: string | null;
+  max_depth: number | null;
+  max_iterations: number | null;
+  backend: string | null;
+  backend_kwargs: Record<string, unknown> | null;
+  environment_type: string | null;
+  environment_kwargs: Record<string, unknown> | null;
+  other_backends: string[] | null;
+}
+
+export interface RLMLogFile {
+  fileName: string;
+  filePath: string;
+  iterations: RLMIteration[];
+  metadata: LogMetadata;
+  config: RLMConfigMetadata;
+}
+
+export interface LogMetadata {
+  totalIterations: number;
+  totalCodeBlocks: number;
+  totalSubLMCalls: number;
+  contextQuestion: string;
+  finalAnswer: string | null;
+  totalExecutionTime: number;
+  hasErrors: boolean;
+}
+
+export function extractFinalAnswer(answer: string | [string, string] | null): string | null {
+  if (!answer) return null;
+  if (Array.isArray(answer)) {
+    return answer[1];
+  }
+  return answer;
+}
+
+
+
+--- base_projects/rlmgw/visualizer/src/lib/utils.ts ---
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+
+--- src/contexto/clients/rlmgw-client.ts (truncated) ---
+/**
+ * RLMgw Client - Integration with Recursive Language Models Gateway
+ *
+ * Provides intelligent context selection through RLM autonomous exploration
+ * Based on the production RLMgw implementation from base_projects/rlmgw
+ */
+
+import { Logger } from '@claude-flow/core';
+import axios, { AxiosInstance } from 'axios';
+
+export interface RLMgwConfig {
+  enabled: boolean;
+  endpoint: string;
+  maxExplorationTime: number;
+  feedbackIndexing: boolean;
+  maxInternalCalls?: number;
+  maxContextPackChars?: number;
+}
+
+export interface RLMgwResult {
+  context: string;
+  completeness: number;
+  confidence: number;
+  files: string[];
+  reasoning: string;
+  explorationTime: number;
+}
+
+export interface ProjectPattern {
+  pattern: string;
+  confidence: number;
+  files: string[];
+  description: string;
+}
+
+export class RLMgwClient {
+  private logger = new Logger('RLMgwClient');
+  private client: AxiosInstance;
+  private isHealthy = false;
+
+  constructor(private config: RLMgwConfig) {
+    this.client = axios.create({
+      baseURL: config.endpoint,
+      timeout: config.maxExplorationTime * 1000 + 5000, // Add 5s buffer
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'contexto-plugin/1.0.0'
+      }
+    });
+  }
+
+  async initialize(): Promise<void> {
+    if (!this.config.enabled) {
+      this.logger.info('RLMgw client disabled in configuration');
+      return;
+    }
+
+    try {
+      // Test connection to RLMgw
+      const response = await this.client.get('/readyz');
+      this.isHealthy = response.status === 200;
+
+      if (this.isHealthy) {
+        this.logger.info(`RLMgw client initialized successfully - endpoint: ${this.config.endpoint}`);
+      } else {
+        this.logger.warn(`RLMgw endpoint responded but may not be fully ready`);
+      }
+    } catch (error) {
+      this.logger.error('Failed to initialize RLMgw client:', error);
+      this.isHealthy = false;
+      // Don't throw - allow degraded operation
+    }
+  }
+
+  /**
+   * Explore repository context using RLM autonomous exploration
+   */
+  async explore(query: string, sessionId?: string): Promise<RLMgwResult> {
+    if (!this.config.enabled) {
+      throw new Error('RLMgw client is disabled');
+    }
+
+    if (!this.isHealthy) {
+      throw new Error('RLMgw client is not healthy');
+    }
+
+    const startTime = Date.now();
+
+    try {
+      // Build request in OpenAI-compatible format
+      const request = {
+        model: 'minimax-m2-1', // Default model for RLMgw
+        messages: [
+          {
+            role: 'user' as const,
+            content: query
+          }
+        ],
+        max_tokens: this.config.maxContextPackChars || 12000,
+        temperature: 0.1, // Low temperature for deterministic context selection
+        // Optional session management
+        ...(sessionId && { session_id: sessionId })
+      };
+
+      this.logger.debug('Sending exploration request to RLMgw', {
+        query: query.substring(0, 100) + '...',
+        sessionId
+      });
+
+      const response = await this.client.post('/v1/chat/completions', request);
+
+      if (response.status !== 200) {
+        throw new Error(`RLMgw returned status ${response.status}: ${response.statusText}`);
+      }
+
+      const explorationTime = Date.now() - startTime;
+
+      // Parse RLMgw response
+      const content = response.data.choices[0]?.message?.content || '';
+      const usage = response.data.usage || {};
+
+      // Extract context information from the response
+      // RLMgw includes file paths and reasoning in its responses
+      const result = this.parseRLMgwResponse(content, explorationTime);
+
+      this.logger.info(`RLMgw exploration completed`, {
+        explorationTime: `${explorationTime}ms`,
+        filesFound: result.files.length,
+        completeness: result.completeness,
+        tokens: usage.total_tokens
+      });
+
+      return result;
+
+    } catch (error) {
+      this.logger.error('RLMgw exploration failed:', error);
+
+      if (error.response) {
+        this.logger.error('RLMgw error response:', {
+          status: error.response.status,
+          data: error.response.data
+        });
+      }
+
+      throw new Error(`RLMgw exploration failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Analyze multiple projects to discover common patterns
+   * Inspired by ADW cross-project intelligence
+   */
+  async analyzeProjectPatterns(projectPaths: string[]): Promise<ProjectPattern[]> {
+    const patterns: ProjectPattern[] = [];
+
+    for (const projectPath of projectPaths) {
+      try {
+        const query = `Analyze the architecture and patterns in project: ${projectPath}. Focus on common patterns, structure, and key components.`;
+        const result = await this.explore(query);
+
+        // Extract patterns from the exploration result
+        const projectPatterns = this.extractPatternsFromResult(result, projectPath);
+        patterns.push(...projectPatterns);
+
+      } catch (error) {
+        this.logger.warn(`Failed to analyze project ${projectPath}:`, error);
+      
+
+--- src/contexto/clients/ruflo-v3-client.ts (truncated) ---
+/**
+ * Ruflo V3 Client - Integration with Claude-Flow V3 Memory and Intelligence
+ *
+ * Leverages existing Ruflo V3 infrastructure:
+ * - HNSW semantic search (<100ms)
+ * - 4-type memory system (episodic/semantic/procedural/working)
+ * - SONA learning + MoE routing
+ * - Hyperbolic Poincaré geometry indexing
+ */
+
+import { Logger } from '@claude-flow/core';
+
+export interface RufloV3Config {
+  enabled: boolean;
+  confidenceThreshold: number;
+  maxCacheAge: number;
+}
+
+export interface SemanticSearchResult {
+  context: string;
+  confidence: number;
+  completeness: number;
+  files: string[];
+  searchTime: number;
+  memoryType: 'episodic' | 'semantic' | 'procedural' | 'working';
+  namespace: string;
+}
+
+export interface MemoryStoreRequest {
+  key: string;
+  value: string;
+  namespace?: string;
+  tags?: string[];
+  ttl?: number;
+}
+
+declare global {
+  // Extend global with Claude-Flow MCP tools
+  var mcp__claude_flow__memory_search: (params: {
+    query: string;
+    namespace?: string;
+    limit?: number;
+    threshold?: number;
+  }) => Promise<{ results: any[]; metadata: any }>;
+
+  var mcp__claude_flow__memory_store: (params: {
+    key: string;
+    value: string;
+    namespace?: string;
+    tags?: string[];
+    ttl?: number;
+  }) => Promise<{ stored: boolean; key: string }>;
+
+  var mcp__claude_flow__embeddings_search: (params: {
+    query: string;
+    threshold?: number;
+    limit?: number;
+  }) => Promise<{ results: any[]; searchTime: number }>;
+
+  var mcp__claude_flow__neural_patterns: (params: {
+    input: string;
+    pattern_type?: string;
+  }) => Promise<{ patterns: any[]; confidence: number }>;
+}
+
+export class RufloV3Client {
+  private logger = new Logger('RufloV3Client');
+  private initialized = false;
+
+  constructor(private config: RufloV3Config) {}
+
+  async initialize(): Promise<void> {
+    if (!this.config.enabled) {
+      this.logger.info('Ruflo V3 client disabled in configuration');
+      return;
+    }
+
+    try {
+      // Verify MCP tools are available
+      if (typeof global.mcp__claude_flow__memory_search !== 'function') {
+        throw new Error('Claude-Flow memory MCP tools not available');
+      }
+
+      this.initialized = true;
+      this.logger.info('Ruflo V3 client initialized - MCP tools available');
+
+    } catch (error) {
+      this.logger.error('Failed to initialize Ruflo V3 client:', error);
+      this.initialized = false;
+    }
+  }
+
+  /**
+   * Perform semantic search using HNSW indexing
+   * Target: <100ms response time (from investigation report)
+   */
+  async semanticSearch(query: string, namespace?: string): Promise<SemanticSearchResult> {
+    if (!this.config.enabled || !this.initialized) {
+      throw new Error('Ruflo V3 client not available');
+    }
+
+    const startTime = Date.now();
+
+    try {
+      // Use MCP memory search with optimized parameters
+      const searchResult = await global.mcp__claude_flow__memory_search({
+        query,
+        namespace: namespace || 'contexto',
+        limit: 10,
+        threshold: this.config.confidenceThreshold
+      });
+
+      const searchTime = Date.now() - startTime;
+
+      if (!searchResult.results || searchResult.results.length === 0) {
+        return {
+          context: '',
+          confidence: 0,
+          completeness: 0,
+          files: [],
+          searchTime,
+          memoryType: 'semantic',
+          namespace: namespace || 'contexto'
+        };
+      }
+
+      // Process search results
+      const topResult = searchResult.results[0];
+      const allResults = searchResult.results;
+
+      // Calculate confidence based on similarity scores
+      const confidence = topResult.similarity || topResult.score || 0;
+
+      // Combine context from multiple results if confidence is high
+      let combinedContext = '';
+      let files: string[] = [];
+
+      if (confidence > this.config.confidenceThreshold) {
+        combinedContext = allResults
+          .slice(0, 5) // Top 5 results
+          .map(r => r.value || r.content || '')
+          .join('\\n\\n---\\n\\n');
+
+        files = allResults
+          .flatMap(r => r.files || [])
+          .filter((file, index, arr) => arr.indexOf(file) === index); // Unique files
+      } else {
+        combinedContext = topResult.value || topResult.content || '';
+        files = topResult.files || [];
+      }
+
+      // Calculate completeness based on result quality
+      const completeness = Math.min(0.95, // Cap at 95% for cached results
+        Math.max(0.3, confidence * 0.8 + (files.length / 10) * 0.2)
+      );
+
+      this.logger.info(`Ruflo V3 search completed`, {
+        searchTime: `${searchTime}ms`,
+        confidence: confidence.toFixed(2),
+        resultsCount: allResults.length,
+        filesCount: files.length
+      });
+
+      return {
+        context: combinedContext,
+        confidence,
+        completeness,
+        files,
+        searchTime,
+        memoryType: this.determineMemoryType(topResult),
+        namespace: namespace || 'contexto'
+      };
+
+    } catch (error) {
+      this.logger.error(
+
+--- src/contexto/config/plugin-config.ts ---
+/**
+ * Plugin Configuration - Default configuration inspired by ADW investigation report
+ */
+
+import { ContextoConfig } from '../plugin';
+
+export const defaultContextoConfig: ContextoConfig = {
+  name: 'contexto',
+  version: '1.0.0',
+  enabled: true,
+
+  // Hybrid configuration based on investigation findings
+  rufloV3: {
+    enabled: true,
+    confidenceThreshold: 0.4, // Route to RLMgw if below 40%
+    maxCacheAge: 86400 * 7, // 7 days
+  },
+
+  rlmgw: {
+    enabled: true,
+    endpoint: 'http://127.0.0.1:8010', // Default RLMgw endpoint
+    maxExplorationTime: 5000, // 5s target from investigation
+    feedbackIndexing: true, // Enable learning
+  },
+
+  // Performance targets from investigation report
+  performance: {
+    targetCachedResponseTime: 100, // <100ms
+    targetLiveResponseTime: 5000,   // <5s
+    targetCompleteness: 0.98,       // 98%+
+    targetCacheHitRate: 0.70,       // >70%
+  },
+
+  // Memory configuration
+  memory: {
+    namespaceStrategy: 'mixed', // Project + domain hybrid
+    persistentLearning: true,
+    crossSessionEnabled: true,
+  },
+};
+
+/**
+ * Validate configuration
+ */
+export function validateConfig(config: Partial<ContextoConfig>): ContextoConfig {
+  const merged = { ...defaultContextoConfig, ...config };
+
+  // Validate thresholds
+  if (merged.rufloV3.confidenceThreshold < 0 || merged.rufloV3.confidenceThreshold > 1) {
+    throw new Error('Ruflo V3 confidence threshold must be between 0 and 1');
+  }
+
+  if (merged.performance.targetCompleteness < 0 || merged.performance.targetCompleteness > 1) {
+    throw new Error('Target completeness must be between 0 and 1');
+  }
+
+  if (merged.performance.targetCacheHitRate < 0 || merged.performance.targetCacheHitRate > 1) {
+    throw new Error('Target cache hit rate must be between 0 and 1');
+  }
+
+  // Validate timeouts
+  if (merged.rlmgw.maxExplorationTime < 1000) {
+    throw new Error('RLMgw max exploration time must be at least 1000ms');
+  }
+
+  return merged;
+}
+
+/**
+ * Load configuration from environment variables
+ */
+export function loadConfigFromEnv(): Partial<ContextoConfig> {
+  return {
+    rufloV3: {
+      enabled: process.env.CONTEXTO_RUFLO_V3_ENABLED !== 'false',
+      confidenceThreshold: parseFloat(process.env.CONTEXTO_CONFIDENCE_THRESHOLD || '0.4'),
+      maxCacheAge: parseInt(process.env.CONTEXTO_CACHE_MAX_AGE || '604800'), // 7 days
+    },
+
+    rlmgw: {
+      enabled: process.env.CONTEXTO_RLMGW_ENABLED !== 'false',
+      endpoint: process.env.CONTEXTO_RLMGW_ENDPOINT || 'http://127.0.0.1:8010',
+      maxExplorationTime: parseInt(process.env.CONTEXTO_MAX_EXPLORATION_TIME || '5000'),
+      feedbackIndexing: process.env.CONTEXTO_FEEDBACK_INDEXING !== 'false',
+    },
+
+    performance: {
+      targetCachedResponseTime: parseInt(process.env.CONTEXTO_TARGET_CACHED_TIME || '100'),
+      targetLiveResponseTime: parseInt(process.env.CONTEXTO_TARGET_LIVE_TIME || '5000'),
+      targetCompleteness: parseFloat(process.env.CONTEXTO_TARGET_COMPLETENESS || '0.98'),
+      targetCacheHitRate: parseFloat(process.env.CONTEXTO_TARGET_CACHE_HIT_RATE || '0.70'),
+    },
+
+    memory: {
+      namespaceStrategy: (process.env.CONTEXTO_NAMESPACE_STRATEGY as any) || 'mixed',
+      persistentLearning: process.env.CONTEXTO_PERSISTENT_LEARNING !== 'false',
+      crossSessionEnabled: process.env.CONTEXTO_CROSS_SESSION !== 'false',
+    },
+  };
+}
+
+
+--- src/contexto/memory/memory-integration.ts (truncated) ---
+/**
+ * Memory Integration - Advanced memory patterns for cross-session learning
+ *
+ * Implements sophisticated memory management inspired by ADW skills:
+ * - Feedback indexing (RLMgw results → Ruflo V3)
+ * - Cross-project pattern recognition
+ * - Adaptive namespace organization
+ * - Persistent learning optimization
+ */
+
+import { Logger } from '@claude-flow/core';
+import { RLMgwResult } from '../clients/rlmgw-client';
+import { RufloV3Client, MemoryStoreRequest } from '../clients/ruflo-v3-client';
+
+export interface MemoryConfig {
+  namespaceStrategy: 'project' | 'domain' | 'mixed';
+  persistentLearning: boolean;
+  crossSessionEnabled: boolean;
+}
+
+export interface LearningPattern {
+  pattern: string;
+  frequency: number;
+  confidence: number;
+  contexts: string[];
+  lastSeen: Date;
+}
+
+export interface MemoryNamespace {
+  name: string;
+  description: string;
+  entryCount: number;
+  averageConfidence: number;
+}
+
+export class MemoryIntegration {
+  private logger = new Logger('MemoryIntegration');
+  private rufloClient?: RufloV3Client;
+  private learningPatterns = new Map<string, LearningPattern>();
+  private namespaceStats = new Map<string, MemoryNamespace>();
+
+  constructor(private config: MemoryConfig) {}
+
+  async initialize(): Promise<void> {
+    this.logger.info('Memory integration initializing', { config: this.config });
+
+    if (this.config.persistentLearning) {
+      await this.loadExistingPatterns();
+    }
+
+    this.logger.info('Memory integration ready');
+  }
+
+  /**
+   * Set Ruflo V3 client for memory operations
+   */
+  setRufloClient(client: RufloV3Client): void {
+    this.rufloClient = client;
+  }
+
+  /**
+   * Index RLMgw exploration results into Ruflo V3 memory
+   * This enables cross-session learning and improves cache hit rates
+   */
+  async indexRLMgwResults(result: RLMgwResult, originalQuery: string): Promise<void> {
+    if (!this.rufloClient) {
+      this.logger.warn('Ruflo V3 client not available for indexing');
+      return;
+    }
+
+    try {
+      // Generate memory key based on query and context
+      const memoryKey = this.generateMemoryKey(originalQuery, result);
+
+      // Determine namespace using configured strategy
+      const namespace = this.determineNamespace(originalQuery, result);
+
+      // Create comprehensive memory entry
+      const memoryEntry: MemoryStoreRequest = {
+        key: memoryKey,
+        value: this.buildContextValue(result, originalQuery),
+        namespace,
+        tags: this.generateTags(result, originalQuery),
+        ttl: this.calculateTTL(result.confidence)
+      };
+
+      // Store in Ruflo V3 memory
+      await this.rufloClient.storeContext(memoryEntry);
+
+      // Update learning patterns
+      if (this.config.persistentLearning) {
+        await this.updateLearningPatterns(originalQuery, result);
+      }
+
+      // Update namespace statistics
+      this.updateNamespaceStats(namespace, result.confidence);
+
+      this.logger.info('Successfully indexed RLMgw result', {
+        key: memoryKey,
+        namespace,
+        confidence: result.confidence,
+        filesCount: result.files.length
+      });
+
+    } catch (error) {
+      this.logger.error('Failed to index RLMgw result:', error);
+    }
+  }
+
+  /**
+   * Store project patterns discovered through cross-project analysis
+   */
+  async storeProjectPatterns(patterns: any[]): Promise<void> {
+    if (!this.rufloClient) {
+      return;
+    }
+
+    const requests: MemoryStoreRequest[] = patterns.map(pattern => ({
+      key: `pattern-${pattern.pattern.toLowerCase().replace(/\\s+/g, '-')}`,
+      value: JSON.stringify(pattern),
+      namespace: 'architecture-patterns',
+      tags: ['pattern', 'cross-project', 'architecture'],
+      ttl: 86400 * 30 // 30 days for patterns
+    }));
+
+    await this.rufloClient.batchStoreContext(requests);
+
+    this.logger.info(`Stored ${patterns.length} project patterns`);
+  }
+
+  /**
+   * Optimize memory organization based on usage patterns
+   */
+  async optimizeNamespaces(): Promise<void> {
+    if (!this.config.persistentLearning) {
+      return;
+    }
+
+    // Analyze namespace effectiveness
+    const stats = Array.from(this.namespaceStats.values());
+
+    // Identify underperforming namespaces
+    const lowPerformingNamespaces = stats.filter(
+      ns => ns.entryCount > 50 && ns.averageConfidence < 0.6
+    );
+
+    if (lowPerformingNamespaces.length > 0) {
+      this.logger.info('Detected underperforming namespaces', {
+        count: lowPerformingNamespaces.length,
+        namespaces: lowPerformingNamespaces.map(ns => ns.name)
+      });
+
+      // In a full implementation, this would:
+      // 1. Re-categorize memory entries
+      // 2. Merge similar namespaces
+      // 3. Split large namespaces by domain
+      // 4. Update namespace strategy
+    }
+
+    // Identify high-performing patterns
+    const topPatterns = Array.from(this.learningPatterns.values())
+      .sort((a, b) => b.frequency * b.confidence - a.frequency * a.confidence)
+      .slice(0, 10);
+
+    this.logger.info('Top learning patterns
+
+--- src/contexto/monitoring/performance-monitor.ts (truncated) ---
+/**
+ * Performance Monitor - Real-time performance tracking and optimization
+ *
+ * Tracks ADW-defined performance targets:
+ * - <100ms cached responses
+ * - <5s live exploration
+ * - 98%+ context completeness
+ * - >70% cache hit rate
+ */
+
+import { Logger } from '@claude-flow/core';
+
+export interface PerformanceTargets {
+  targetCachedResponseTime: number; // <100ms
+  targetLiveResponseTime: number;   // <5s
+  targetCompleteness: number;       // 98%+
+  targetCacheHitRate: number;       // >70%
+}
+
+export interface PerformanceMetrics {
+  cacheHitRate: number;
+  averageResponseTime: number;
+  contextCompleteness: number;
+  errorRate: number;
+  throughput: number; // requests per second
+
+  // Detailed breakdowns
+  cached: { count: number; avgTime: number; };
+  live: { count: number; avgTime: number; };
+  errors: { count: number; types: Record<string, number>; };
+}
+
+export interface PerformanceEvent {
+  type: 'cache_hit' | 'live_exploration' | 'error' | 'optimization';
+  timestamp: number;
+  duration: number;
+  metadata: any;
+}
+
+export class PerformanceMonitor {
+  private logger = new Logger('PerformanceMonitor');
+  private events: PerformanceEvent[] = [];
+  private metrics: PerformanceMetrics;
+  private startTime = Date.now();
+
+  constructor(private targets: PerformanceTargets) {
+    this.metrics = this.initializeMetrics();
+  }
+
+  async initialize(): Promise<void> {
+    this.logger.info('Performance monitor initialized', { targets: this.targets });
+
+    // Start periodic metrics calculation
+    setInterval(() => this.calculateMetrics(), 10000); // Every 10 seconds
+  }
+
+  /**
+   * Record cache hit performance
+   */
+  recordCacheHit(responseTime: number): void {
+    this.events.push({
+      type: 'cache_hit',
+      timestamp: Date.now(),
+      duration: responseTime,
+      metadata: { target: this.targets.targetCachedResponseTime }
+    });
+
+    // Alert if target exceeded
+    if (responseTime > this.targets.targetCachedResponseTime) {
+      this.logger.warn(`Cache hit exceeded target: ${responseTime}ms > ${this.targets.targetCachedResponseTime}ms`);
+    }
+  }
+
+  /**
+   * Record live exploration performance
+   */
+  recordLiveExploration(responseTime: number): void {
+    this.events.push({
+      type: 'live_exploration',
+      timestamp: Date.now(),
+      duration: responseTime,
+      metadata: { target: this.targets.targetLiveResponseTime }
+    });
+
+    // Alert if target exceeded
+    if (responseTime > this.targets.targetLiveResponseTime) {
+      this.logger.warn(`Live exploration exceeded target: ${responseTime}ms > ${this.targets.targetLiveResponseTime}ms`);
+    }
+  }
+
+  /**
+   * Record error events
+   */
+  recordError(error: Error, context: string): void {
+    this.events.push({
+      type: 'error',
+      timestamp: Date.now(),
+      duration: 0,
+      metadata: {
+        error: error.message,
+        context,
+        stack: error.stack
+      }
+    });
+
+    this.logger.error('Performance event - error recorded', { error: error.message, context });
+  }
+
+  /**
+   * Get current performance metrics
+   */
+  async getCurrentMetrics(): Promise<PerformanceMetrics> {
+    this.calculateMetrics();
+    return { ...this.metrics };
+  }
+
+  /**
+   * Calculate performance metrics from events
+   */
+  private calculateMetrics(): void {
+    const now = Date.now();
+    const windowMs = 60000; // 1 minute window
+    const recentEvents = this.events.filter(e => now - e.timestamp <= windowMs);
+
+    if (recentEvents.length === 0) {
+      return; // No events to process
+    }
+
+    // Cache hits
+    const cacheHits = recentEvents.filter(e => e.type === 'cache_hit');
+    const cacheHitTimes = cacheHits.map(e => e.duration);
+
+    // Live explorations
+    const liveEvents = recentEvents.filter(e => e.type === 'live_exploration');
+    const liveTimes = liveEvents.map(e => e.duration);
+
+    // Errors
+    const errors = recentEvents.filter(e => e.type === 'error');
+    const errorTypes: Record<string, number> = {};
+    errors.forEach(e => {
+      const errorType = e.metadata.error || 'unknown';
+      errorTypes[errorType] = (errorTypes[errorType] || 0) + 1;
+    });
+
+    // Calculate aggregated metrics
+    const totalRequests = cacheHits.length + liveEvents.length;
+    const totalErrors = errors.length;
+
+    this.metrics = {
+      cacheHitRate: totalRequests > 0 ? cacheHits.length / totalRequests : 0,
+      averageResponseTime: this.average([...cacheHitTimes, ...liveTimes]),
+      contextCompleteness: 0.95, // Would be calculated from actual context quality
+      errorRate: (totalRequests + totalErrors) > 0 ? totalErrors / (totalRequests + totalErrors) : 0,
+      throughput: totalRequests / (windowMs / 1000), // requests per second
+
+      cached: {
+        count: cacheHits.length,
+        avgTime: this.average(cacheHitTimes)
+      },
+      live: {
+        count: liveEvents.length,
+        avgTime: this.average(liveTimes)
+      },
+      errors: {
+        count: errors.length,
+        types: errorTypes
+      }
+    };
+
+    // Check targets and lo
+
+--- src/contexto/plugin.ts (truncated) ---
+/**
+ * Contexto Plugin - RLMgw Evolution for Ruflo V3
+ *
+ * Inspired by ADW Skills architecture, this plugin provides:
+ * - 98%+ context completeness through hybrid Ruflo V3 + RLMgw
+ * - <100ms cached responses via HNSW semantic search
+ * - <5s live exploration via RLMgw autonomous discovery
+ * - Cross-session learning with persistent memory
+ */
+
+import { Plugin, PluginConfig, ContextRequest, ContextResponse } from '@claude-flow/core';
+import { RufloV3Client } from './clients/ruflo-v3-client';
+import { RLMgwClient } from './clients/rlmgw-client';
+import { ContextRouter } from './routing/context-router';
+import { MemoryIntegration } from './memory/memory-integration';
+import { PerformanceMonitor } from './monitoring/performance-monitor';
+
+export interface ContextoConfig extends PluginConfig {
+  // Hybrid configuration
+  rufloV3: {
+    enabled: boolean;
+    confidenceThreshold: number; // Route to RLMgw if below this
+    maxCacheAge: number;
+  };
+
+  rlmgw: {
+    enabled: boolean;
+    endpoint: string;
+    maxExplorationTime: number;
+    feedbackIndexing: boolean; // Feed results back to Ruflo V3
+  };
+
+  // Performance targets (from investigation report)
+  performance: {
+    targetCachedResponseTime: number; // <100ms
+    targetLiveResponseTime: number;   // <5s
+    targetCompleteness: number;       // 98%+
+    targetCacheHitRate: number;       // >70%
+  };
+
+  // Memory configuration
+  memory: {
+    namespaceStrategy: 'project' | 'domain' | 'mixed';
+    persistentLearning: boolean;
+    crossSessionEnabled: boolean;
+  };
+}
+
+export class ContextoPlugin extends Plugin {
+  private rufloClient: RufloV3Client;
+  private rlmgwClient: RLMgwClient;
+  private router: ContextRouter;
+  private memory: MemoryIntegration;
+  private monitor: PerformanceMonitor;
+
+  constructor(private config: ContextoConfig) {
+    super('contexto', '1.0.0');
+
+    this.rufloClient = new RufloV3Client(config.rufloV3);
+    this.rlmgwClient = new RLMgwClient(config.rlmgw);
+    this.router = new ContextRouter(config);
+    this.memory = new MemoryIntegration(config.memory);
+    this.monitor = new PerformanceMonitor(config.performance);
+  }
+
+  async initialize(): Promise<void> {
+    await Promise.all([
+      this.rufloClient.initialize(),
+      this.rlmgwClient.initialize(),
+      this.memory.initialize(),
+      this.monitor.initialize()
+    ]);
+
+    this.logger.info('Contexto plugin initialized - hybrid Ruflo V3 + RLMgw ready');
+  }
+
+  /**
+   * Main context delivery endpoint
+   * Implements the optimal hybrid architecture from investigation report
+   */
+  async getContext(request: ContextRequest): Promise<ContextResponse> {
+    const startTime = Date.now();
+
+    try {
+      // Step 1: Try Ruflo V3 semantic search (fast path)
+      const rufloResult = await this.rufloClient.semanticSearch(request.query);
+
+      if (rufloResult.confidence > this.config.rufloV3.confidenceThreshold) {
+        // High confidence - return cached result
+        const response = this.createResponse(rufloResult, 'cached', startTime);
+        this.monitor.recordCacheHit(response.metadata.responseTime);
+        return response;
+      }
+
+      // Step 2: Low confidence - use RLMgw exploration
+      this.logger.info(`Low confidence (${rufloResult.confidence}), routing to RLMgw`);
+      const rlmgwResult = await this.rlmgwClient.explore(request.query);
+
+      // Step 3: Feed back to Ruflo V3 for learning (if enabled)
+      if (this.config.rlmgw.feedbackIndexing) {
+        await this.memory.indexRLMgwResults(rlmgwResult, request.query);
+      }
+
+      const response = this.createResponse(rlmgwResult, 'live', startTime);
+      this.monitor.recordLiveExploration(response.metadata.responseTime);
+      return response;
+
+    } catch (error) {
+      this.logger.error('Context delivery failed:', error);
+      return this.createErrorResponse(error, startTime);
+    }
+  }
+
+  /**
+   * ADW-inspired batch context processing
+   * For handling multiple context requests efficiently
+   */
+  async getBatchContext(requests: ContextRequest[]): Promise<ContextResponse[]> {
+    // Parallel processing with smart batching
+    const batchResults = await Promise.allSettled(
+      requests.map(req => this.getContext(req))
+    );
+
+    return batchResults.map(result =>
+      result.status === 'fulfilled' ? result.value : this.createErrorResponse(result.reason)
+    );
+  }
+
+  /**
+   * Cross-project context discovery inspired by ADW skills
+   */
+  async discoverProjectPatterns(projectPaths: string[]): Promise<void> {
+    const patterns = await this.rlmgwClient.analyzeProjectPatterns(projectPaths);
+    await this.memory.storeProjectPatterns(patterns);
+    this.logger.info(`Discovered and stored patterns for ${projectPaths.length} projects`);
+  }
+
+  /**
+   * Performance optimization inspired by ADW methodology
+   */
+  async optimizePerformance(): Promise<void> {
+    const metrics = await this.monitor.getCurrentMetrics();
+
+    if (metrics.cacheHitRate < this.config.performance.targetCacheHitRate) {
+      // Adjust
+
+--- src/contexto/routing/context-router.ts (truncated) ---
+/**
+ * Context Router - Smart routing between Ruflo V3 and RLMgw
+ *
+ * Implements evidence-based routing logic from investigation report:
+ * - High confidence (>60% similarity) → Ruflo V3 cached result
+ * - Low confidence (<40%) → RLMgw live exploration
+ * - Adaptive threshold tuning based on performance metrics
+ */
+
+import { ContextoConfig } from '../plugin';
+import { Logger } from '@claude-flow/core';
+
+export interface RoutingDecision {
+  useRufloV3: boolean;
+  useRLMgw: boolean;
+  confidence: number;
+  reasoning: string;
+}
+
+export interface PerformanceMetrics {
+  cacheHitRate: number;
+  averageResponseTime: number;
+  contextCompleteness: number;
+  errorRate: number;
+}
+
+export class ContextRouter {
+  private logger = new Logger('ContextRouter');
+  private confidenceThreshold: number;
+  private adaptiveThresholdEnabled: boolean;
+
+  constructor(private config: ContextoConfig) {
+    this.confidenceThreshold = config.rufloV3.confidenceThreshold;
+    this.adaptiveThresholdEnabled = true;
+  }
+
+  /**
+   * Make routing decision based on query characteristics and confidence
+   */
+  async route(query: string, rufloConfidence?: number): Promise<RoutingDecision> {
+    // If Ruflo V3 is disabled, always use RLMgw
+    if (!this.config.rufloV3.enabled) {
+      return {
+        useRufloV3: false,
+        useRLMgw: true,
+        confidence: 0,
+        reasoning: 'Ruflo V3 disabled in configuration'
+      };
+    }
+
+    // If RLMgw is disabled, always use Ruflo V3
+    if (!this.config.rlmgw.enabled) {
+      return {
+        useRufloV3: true,
+        useRLMgw: false,
+        confidence: rufloConfidence || 0,
+        reasoning: 'RLMgw disabled in configuration'
+      };
+    }
+
+    // If we have Ruflo confidence, use it for decision
+    if (rufloConfidence !== undefined) {
+      if (rufloConfidence > this.confidenceThreshold) {
+        return {
+          useRufloV3: true,
+          useRLMgw: false,
+          confidence: rufloConfidence,
+          reasoning: `High confidence (${rufloConfidence.toFixed(2)}) above threshold (${this.confidenceThreshold})`
+        };
+      } else {
+        return {
+          useRufloV3: false,
+          useRLMgw: true,
+          confidence: rufloConfidence,
+          reasoning: `Low confidence (${rufloConfidence.toFixed(2)}) below threshold (${this.confidenceThreshold})`
+        };
+      }
+    }
+
+    // Analyze query characteristics for initial routing
+    const queryCharacteristics = this.analyzeQuery(query);
+
+    if (queryCharacteristics.isExploratoryQuery) {
+      return {
+        useRufloV3: false,
+        useRLMgw: true,
+        confidence: 0,
+        reasoning: 'Exploratory query detected - requires live exploration'
+      };
+    }
+
+    if (queryCharacteristics.isSpecificQuery) {
+      return {
+        useRufloV3: true,
+        useRLMgw: false,
+        confidence: 0.8, // Assume high confidence for specific queries
+        reasoning: 'Specific query detected - likely in cache'
+      };
+    }
+
+    // Default: try Ruflo V3 first
+    return {
+      useRufloV3: true,
+      useRLMgw: false,
+      confidence: 0.5,
+      reasoning: 'Default routing to Ruflo V3 for initial attempt'
+    };
+  }
+
+  /**
+   * Adaptive threshold adjustment based on performance metrics
+   * Inspired by ADW evidence-based optimization
+   */
+  async adjustConfidenceThreshold(metrics: PerformanceMetrics): Promise<void> {
+    if (!this.adaptiveThresholdEnabled) return;
+
+    const oldThreshold = this.confidenceThreshold;
+
+    // If cache hit rate is too low, lower threshold (more aggressive caching)
+    if (metrics.cacheHitRate < this.config.performance.targetCacheHitRate) {
+      this.confidenceThreshold = Math.max(0.3, this.confidenceThreshold - 0.05);
+      this.logger.info(`Lowered confidence threshold: ${oldThreshold} → ${this.confidenceThreshold} (cache hit rate: ${metrics.cacheHitRate})`);
+    }
+
+    // If cache hit rate is too high but completeness is low, raise threshold
+    if (metrics.cacheHitRate > 0.8 && metrics.contextCompleteness < this.config.performance.targetCompleteness) {
+      this.confidenceThreshold = Math.min(0.8, this.confidenceThreshold + 0.05);
+      this.logger.info(`Raised confidence threshold: ${oldThreshold} → ${this.confidenceThreshold} (completeness: ${metrics.contextCompleteness})`);
+    }
+
+    // If error rate is high, be more conservative (higher threshold)
+    if (metrics.errorRate > 0.05) {
+      this.confidenceThreshold = Math.min(0.8, this.confidenceThreshold + 0.1);
+      this.logger.warn(`Raised confidence threshold due to high error rate: ${oldThreshold} → ${this.confidenceThreshold} (error rate: ${metrics.errorRate})`);
+    }
+  }
+
+  /**
+   * Analyze query to determine routing strategy
+   */
+  private analyzeQuery(query: string): {
+    isExploratoryQuery: boolean;
+    isSpecificQuery: boolean;
+    complexity: 'low' | 'medium' | 'high';
+  } {
+    const exploratoryKeywords = [
+      'find', 'search', 'explore', 'discover', 'what', 'how', 'why', 'where',
+      'list all', 'show me', 'overv
+
+--- base_projects/jlma-FACT/.env.example ---
+# Arcade.dev Integration Configuration
+# Copy this file to .env and configure with your actual values
+
+# ==============================================================================
+# ARCADE.DEV CONFIGURATION
+# ==============================================================================
+
+# Arcade.dev API credentials
+ARCADE_API_KEY=your_arcade_api_key_here
+ARCADE_API_SECRET=your_arcade_api_secret_here
+
+# Arcade.dev API endpoints
+ARCADE_API_URL=https://api.arcade.dev
+ARCADE_API_VERSION=v1
+
+# Connection settings
+ARCADE_TIMEOUT=30
+ARCADE_MAX_RETRIES=3
+ARCADE_RETRY_DELAY=1
+
+# Rate limiting
+ARCADE_RATE_LIMIT_REQUESTS=100
+ARCADE_RATE_LIMIT_WINDOW=60
+
+# ==============================================================================
+# FACT FRAMEWORK CONFIGURATION
+# ==============================================================================
+
+# Logging configuration
+FACT_LOG_LEVEL=INFO
+FACT_LOG_FORMAT=json
+FACT_LOG_FILE=logs/fact.log
+
+# Cache configuration
+FACT_CACHE_ENABLED=true
+FACT_CACHE_TYPE=redis
+FACT_CACHE_TTL=3600
+FACT_CACHE_MAX_SIZE=1000
+FACT_CACHE_HOST=localhost
+FACT_CACHE_PORT=6379
+FACT_CACHE_DB=0
+
+# Database configuration
+FACT_DB_TYPE=postgresql
+FACT_DB_HOST=localhost
+FACT_DB_PORT=5432
+FACT_DB_NAME=fact_db
+FACT_DB_USER=fact_user
+FACT_DB_PASSWORD=your_db_password
+
+# Security settings
+FACT_SECRET_KEY=your_secret_key_here
+FACT_ENCRYPTION_KEY=your_encryption_key_here
+FACT_JWT_SECRET=your_jwt_secret_here
+
+# ==============================================================================
+# TESTING CONFIGURATION
+# ==============================================================================
+
+# Test environment settings
+TEST_ARCADE_API_KEY=your_test_api_key_here
+TEST_DB_NAME=fact_test_db
+TEST_CACHE_ENABLED=false
+TEST_LOG_LEVEL=DEBUG
+
+# Test data paths
+TEST_DATA_DIR=test_data
+TEST_OUTPUT_DIR=test_output
+
+# ==============================================================================
+# DEVELOPMENT CONFIGURATION
+# ==============================================================================
+
+# Development mode settings
+DEVELOPMENT_MODE=false
+DEBUG_ENABLED=false
+PROFILING_ENABLED=false
+
+# Hot reload settings
+AUTO_RELOAD=false
+WATCH_FILES=true
+
+# ==============================================================================
+# DEPLOYMENT CONFIGURATION
+# ==============================================================================
+
+# Environment identifier
+ENVIRONMENT=development
+DEPLOYMENT_STAGE=local
+
+# Monitoring and observability
+METRICS_ENABLED=false
+TRACING_ENABLED=false
+HEALTH_CHECK_ENABLED=true
+
+# External service URLs
+WEBHOOK_URL=https://your-webhook-url.com/webhook
+NOTIFICATION_SERVICE_URL=https://your-notification-service.com
+
+# ==============================================================================
+# ARCADE.DEV FEATURE FLAGS
+# ==============================================================================
+
+# Enable/disable specific Arcade.dev features
+ARCADE_CODE_ANALYSIS_ENABLED=true
+ARCADE_TEST_GENERATION_ENABLED=true
+ARCADE_DOCUMENTATION_ENABLED=true
+ARCADE_REFACTORING_ENABLED=true
+ARCADE_BUG_DETECTION_ENABLED=true
+ARCADE_PERFORMANCE_ANALYSIS_ENABLED=true
+
+# Feature-specific settings
+ARCADE_MAX_ANALYSIS_SIZE=1000000
+ARCADE_PARALLEL_REQUESTS=5
+ARCADE_BATCH_SIZE=10
+
+# ==============================================================================
+# INTEGRATION SETTINGS
+# ==============================================================================
+
+# Third-party integrations
+GITHUB_TOKEN=your_github_token_here
+GITLAB_TOKEN=your_gitlab_token_here
+SLACK_WEBHOOK_URL=your_slack_webhook_url_here
+
+# CI/CD integration
+CI_INTEGRATION_ENABLED=false
+AUTO_DEPLOYMENT_ENABLED=false
+QUALITY_GATE_ENABLED=true
+
+# ==============================================================================
+# PERFORMANCE TUNING
+# ==============================================================================
+
+# Worker and thread settings
+MAX_WORKERS=4
+THREAD_POOL_SIZE=10
+CONNECTION_POOL_SIZE=20
+
+# Timeout settings
+HTTP_TIMEOUT=30
+DB_TIMEOUT=10
+CACHE_TIMEOUT=5
+
+# Memory limits
+MAX_MEMORY_USAGE=1024
+MAX_FILE_SIZE=50
+
+# ==============================================================================
+# SECURITY CONFIGURATION
+# ==============================================================================
+
+# SSL/TLS settings
+SSL_VERIFY=true
+SSL_CERT_PATH=certs/cert.pem
+SSL_KEY_PATH=certs/key.pem
+
+# API security
+API_KEY_HEADER=X-API-Key
+CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Session settings
+SESSION_TIMEOUT=3600
+SESSION_SECURE=true
+SESSION_HTTPONLY=true
+
+--- base_projects/jlma-FACT/.env.template (truncated) ---
+# FACT System Environment Configuration Template
+# ============================================
+# 
+# Instructions:
+# 1. Copy this file to .env
+# 2. Replace all placeholder values with your actual configuration
+# 3. Never commit .env with real API keys to version control
+#
+# For production deployments, create environment-specific files:
+# - .env.local (local development)
+# - .env.staging (staging environment) 
+# - .env.production (production environment)
+
+# =============================================================================
+# REQUIRED API KEYS (Must be configured before system startup)
+# =============================================================================
+
+# Anthropic Claude API Key (REQUIRED)
+# Format: sk-ant-api03-[alphanumeric string]
+# Get from: https://console.anthropic.com/
+# Validation: System will validate format on startup
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Arcade AI API Key (REQUIRED)
+# Format: arc_[alphanumeric string] 
+# Get from: https://arcade-ai.com/dashboard
+# Validation: System will validate format on startup
+ARCADE_API_KEY=your_arcade_api_key_here
+
+# =============================================================================
+# OPTIONAL API KEYS
+# =============================================================================
+
+# OpenAI API Key (Optional - for extended LLM capabilities)
+# Format: sk-proj-[alphanumeric string]
+# Get from: https://platform.openai.com/api-keys
+# Uncomment to enable OpenAI integration
+# OPENAI_API_KEY=your_openai_api_key_here
+
+# Encryption Key (Optional - for sensitive data encryption)
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Uncomment to enable data encryption
+# ENCRYPTION_KEY=your_base64_encoded_encryption_key_here
+
+# Cache Encryption Key (Optional - for cache encryption)
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Uncomment to enable cache encryption
+# CACHE_ENCRYPTION_KEY=your_base64_encoded_cache_encryption_key_here
+
+# =============================================================================
+# SYSTEM CONFIGURATION
+# =============================================================================
+
+# Arcade AI Service Configuration
+# Default: https://api.arcade-ai.com
+ARCADE_BASE_URL=https://api.arcade-ai.com
+
+# Database Configuration
+# Path: Relative to project root or absolute path
+# Default: data/fact_demo.db
+DATABASE_PATH=data/fact_demo.db
+
+# Claude Model Configuration
+# Options: claude-3-5-sonnet-20241022, claude-3-haiku-20240307, claude-3-opus-20240229
+# Default: claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-3-5-sonnet-20241022
+
+# System Prompt (Optional override)
+# Default: "You are a deterministic finance assistant. When uncertain, request data via tools."
+SYSTEM_PROMPT=You are a deterministic finance assistant. When uncertain, request data via tools.
+
+# Request Configuration
+# MAX_RETRIES: Range 1-10, Default: 3
+MAX_RETRIES=3
+# REQUEST_TIMEOUT: Range 5-300 seconds, Default: 30
+REQUEST_TIMEOUT=30
+
+# Logging Configuration
+# Options: DEBUG, INFO, WARNING, ERROR
+# Default: INFO
+LOG_LEVEL=INFO
+
+# =============================================================================
+# CACHE CONFIGURATION
+# =============================================================================
+
+# Cache Settings
+# CACHE_PREFIX: Alphanumeric + underscore, Length 1-50
+CACHE_PREFIX=fact_v1
+
+# CACHE_MIN_TOKENS: Range 1-1000 tokens, Default: 50
+CACHE_MIN_TOKENS=50
+
+# CACHE_MAX_SIZE: Format [number][KMGT]B, Range 1MB-10GB, Default: 100MB
+CACHE_MAX_SIZE=100MB
+
+# CACHE_TTL_SECONDS: Range 60-86400 seconds, Default: 3600 (1 hour)
+CACHE_TTL_SECONDS=3600
+
+# Performance targets in milliseconds
+# CACHE_HIT_TARGET_MS: Default: 50.0
+CACHE_HIT_TARGET_MS=50.0
+# CACHE_MISS_TARGET_MS: Default: 200.0
+CACHE_MISS_TARGET_MS=200.0
+
+# =============================================================================
+# SECURITY CONFIGURATION
+# =============================================================================
+
+# Security Modes
+# DEBUG_MODE: Enable debug features (false for production)
+DEBUG_MODE=false
+# STRICT_MODE: Enable strict validation (true for production)
+STRICT_MODE=true
+# ENFORCE_HTTPS: Require HTTPS connections (true for production)
+ENFORCE_HTTPS=true
+
+# Rate Limiting
+# RATE_LIMITING_ENABLED: Enable rate limiting (true for production)
+RATE_LIMITING_ENABLED=true
+# Rate limits per minute
+RATE_LIMIT_USER_PER_MINUTE=60
+RATE_LIMIT_TOOL_PER_MINUTE=30
+RATE_LIMIT_AUTH_PER_MINUTE=5
+
+# Input Validation
+# VALIDATION_MAX_STRING_LENGTH: Maximum input string length
+VALIDATION_MAX_STRING_LENGTH=10000
+# VALIDATION_ALLOW_HTML: Allow HTML in inputs (false for security)
+VALIDATION_ALLOW_HTML=false
+# VALIDATION_ALLOW_JAVASCRIPT: Allow JavaScript in inputs (false for security)
+VALIDATION_ALLOW_JAVASCRIPT=false
+
+# Security Logging
+# LOG_SECURITY_EVENTS: Enable security event logging
+LOG_SECURITY_EVENTS=true
+# SECURITY_LOG_LEVEL: Security log lev
+
+--- base_projects/jlma-FACT/examples/arcade-dev/.env.example ---
+# Arcade.dev Integration Examples - Environment Configuration
+# Copy this file to .env and configure with your actual values
+
+# Required Configuration
+# =====================
+
+# Arcade.dev API Key (Required)
+# Get this from your Arcade.dev dashboard
+ARCADE_API_KEY=your_arcade_api_key_here
+
+# Optional Configuration
+# =====================
+
+# Arcade.dev API URL (Optional)
+# Default: https://api.arcade.dev
+ARCADE_API_URL=https://api.arcade.dev
+
+# Arcade.dev Request Timeout in seconds (Optional)
+# Default: 30
+ARCADE_TIMEOUT=30
+
+# Arcade.dev Maximum Retries (Optional)
+# Default: 3
+ARCADE_MAX_RETRIES=3
+
+# FACT Framework Log Level (Optional)
+# Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+# Default: INFO
+FACT_LOG_LEVEL=INFO
+
+# FACT Cache Enable/Disable (Optional)
+# Options: true, false
+# Default: true
+FACT_CACHE_ENABLED=true
+
+# Additional Optional Configuration
+# ================================
+
+# Arcade.dev Workspace ID (Optional)
+# Required for some advanced features
+ARCADE_WORKSPACE_ID=your_workspace_id
+
+# Redis Configuration for Caching (Optional)
+# Required only if using Redis-based caching
+REDIS_URL=redis://localhost:6379
+CACHE_TTL=3600
+
+# Monitoring Configuration (Optional)
+# Required only if using monitoring features
+ENABLE_METRICS=true
+METRICS_ENDPOINT=http://localhost:8080/metrics
+
+# Security Configuration (Optional)
+# Advanced security settings
+ENABLE_AUDIT_LOGGING=true
+MAX_REQUEST_SIZE=10485760
+RATE_LIMIT_REQUESTS=100
+RATE_LIMIT_WINDOW=60
+
+# Development Configuration (Optional)
+# For development and debugging
+DEBUG_MODE=false
+VERBOSE_LOGGING=false
+ENABLE_PROFILING=false
+
+--- base_projects/gcc/GCC/package.json ---
+{
+  "name": "aline-ai",
+  "version": "0.5.3",
+  "description": "Aline MCP Server - AI Agent Chat Session Tracker",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "chat-history",
+    "claude",
+    "session-tracking",
+    "context-preservation"
+  ],
+  "author": "human-re",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/human-re/aline"
+  },
+  "homepage": "https://github.com/human-re/aline#readme",
+  "bugs": {
+    "url": "https://github.com/human-re/aline/issues"
+  },
+  "bin": {
+    "aline-ai": "./bin/aline-mcp.js"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module"
+}
+
+
+## Instructions
+
+Analyze the above codebase context and provide your response following the format specified in the task.

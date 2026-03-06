@@ -1,0 +1,339 @@
+{
+  "tasks": {
+    "task-1772729596709-gyfczw": {
+      "taskId": "task-1772729596709-gyfczw",
+      "type": "feature",
+      "description": "Design RLMgw + Ruflo V3 plugin architecture for hybrid context selection engine achieving 98%+ context completeness, <100ms cached, <5s live exploration",
+      "priority": "high",
+      "status": "in_progress",
+      "progress": 0,
+      "assignedTo": [
+        "architect-contexto"
+      ],
+      "tags": [
+        "contexto",
+        "architecture",
+        "integration"
+      ],
+      "createdAt": "2026-03-05T16:53:16.709Z",
+      "startedAt": "2026-03-05T16:56:50.585Z",
+      "completedAt": null
+    },
+    "task-1772729598632-xtre97": {
+      "taskId": "task-1772729598632-xtre97",
+      "type": "feature",
+      "description": "Build hybrid context selection engine with RLMgw integration layer, Ruflo V3 semantic search interface with HNSW indexing, targeting 4.75x performance improvement",
+      "priority": "high",
+      "status": "in_progress",
+      "progress": 0,
+      "assignedTo": [
+        "coder-contexto"
+      ],
+      "tags": [
+        "contexto",
+        "implementation",
+        "performance"
+      ],
+      "createdAt": "2026-03-05T16:53:18.632Z",
+      "startedAt": "2026-03-05T16:56:51.596Z",
+      "completedAt": null
+    },
+    "task-1772729600496-xwzygo": {
+      "taskId": "task-1772729600496-xwzygo",
+      "type": "feature",
+      "description": "Implement secure context access controls and session management for RLMgw + Ruflo V3 integration targeting 0.923+ security rating",
+      "priority": "critical",
+      "status": "in_progress",
+      "progress": 0,
+      "assignedTo": [
+        "security-contexto"
+      ],
+      "tags": [
+        "contexto",
+        "security",
+        "access-control"
+      ],
+      "createdAt": "2026-03-05T16:53:20.496Z",
+      "startedAt": "2026-03-05T16:56:52.595Z",
+      "completedAt": null
+    },
+    "task-1772729602450-fybg6n": {
+      "taskId": "task-1772729602450-fybg6n",
+      "type": "feature",
+      "description": "Achieve aggressive performance targets: <100ms cached response, <5s live exploration, 98%+ completeness, >70% cache hit rate, 4.75x improvement",
+      "priority": "high",
+      "status": "in_progress",
+      "progress": 0,
+      "assignedTo": [
+        "performance-contexto"
+      ],
+      "tags": [
+        "contexto",
+        "performance",
+        "optimization"
+      ],
+      "createdAt": "2026-03-05T16:53:22.450Z",
+      "startedAt": "2026-03-05T16:56:53.506Z",
+      "completedAt": null
+    },
+    "task-1772729604352-uwv2z4": {
+      "taskId": "task-1772729604352-uwv2z4",
+      "type": "feature",
+      "description": "Implement cross-session learning with AgentDB integration, feedback indexing, and persistent memory targeting <50ms retrieval and 85% pattern recognition accuracy",
+      "priority": "high",
+      "status": "in_progress",
+      "progress": 0,
+      "assignedTo": [
+        "memory-contexto"
+      ],
+      "tags": [
+        "contexto",
+        "memory",
+        "learning"
+      ],
+      "createdAt": "2026-03-05T16:53:24.353Z",
+      "startedAt": "2026-03-05T16:57:03.065Z",
+      "completedAt": null
+    },
+    "task-1772729605813-nx0brf": {
+      "taskId": "task-1772729605813-nx0brf",
+      "type": "feature",
+      "description": "Build comprehensive validation and benchmarking suite with evidence-based quality gates for RLMgw + Ruflo V3 hybrid operations",
+      "priority": "high",
+      "status": "in_progress",
+      "progress": 0,
+      "assignedTo": [
+        "tester-contexto"
+      ],
+      "tags": [
+        "contexto",
+        "testing",
+        "validation"
+      ],
+      "createdAt": "2026-03-05T16:53:25.813Z",
+      "startedAt": "2026-03-05T16:57:03.573Z",
+      "completedAt": null
+    },
+    "task-1772729608210-rkhba2": {
+      "taskId": "task-1772729608210-rkhba2",
+      "type": "research",
+      "description": "Research advanced patterns from ADW methodologies and provide evidence-based intelligence for strategic and technical decisions with confidence scores ≥0.70",
+      "priority": "high",
+      "status": "in_progress",
+      "progress": 0,
+      "assignedTo": [
+        "researcher-contexto"
+      ],
+      "tags": [
+        "contexto",
+        "research",
+        "evidence"
+      ],
+      "createdAt": "2026-03-05T16:53:28.210Z",
+      "startedAt": "2026-03-05T16:57:04.503Z",
+      "completedAt": null
+    },
+    "task-1772729609731-fxitk4": {
+      "taskId": "task-1772729609731-fxitk4",
+      "type": "feature",
+      "description": "Orchestrate ADW phases and ensure consistent architecture with quality gate compliance across all contexto project agents",
+      "priority": "critical",
+      "status": "in_progress",
+      "progress": 0,
+      "assignedTo": [
+        "coordinator-contexto"
+      ],
+      "tags": [
+        "contexto",
+        "coordination",
+        "adw"
+      ],
+      "createdAt": "2026-03-05T16:53:29.732Z",
+      "startedAt": "2026-03-05T16:57:05.491Z",
+      "completedAt": null
+    },
+    "task-1772745043421-7ovbns": {
+      "taskId": "task-1772745043421-7ovbns",
+      "type": "feature",
+      "description": "Plugin Architecture - Design Ruflo V3 + RLMgw integration for contexto plugin with 98%+ context completeness",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "contexto-architect"
+      ],
+      "tags": [
+        "architecture",
+        "integration",
+        "contexto"
+      ],
+      "createdAt": "2026-03-05T21:10:43.421Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745043472-wlez5x": {
+      "taskId": "task-1772745043472-wlez5x",
+      "type": "feature",
+      "description": "Core Implementation - Build hybrid context engine with <100ms cached responses and <5s live discovery",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "contexto-coder"
+      ],
+      "tags": [
+        "core",
+        "performance",
+        "contexto"
+      ],
+      "createdAt": "2026-03-05T21:10:43.473Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745044855-guwv2l": {
+      "taskId": "task-1772745044855-guwv2l",
+      "type": "feature",
+      "description": "Security Architecture - Implement secure context access with 0.923+ security rating for session management",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "contexto-security"
+      ],
+      "tags": [
+        "security",
+        "access-control",
+        "contexto"
+      ],
+      "createdAt": "2026-03-05T21:10:44.855Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745046753-dcfott": {
+      "taskId": "task-1772745046753-dcfott",
+      "type": "feature",
+      "description": "Performance Optimization - Achieve 4.75x performance improvement with >70% cache hit rate and HNSW optimizations",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "contexto-performance"
+      ],
+      "tags": [
+        "performance",
+        "optimization",
+        "contexto"
+      ],
+      "createdAt": "2026-03-05T21:10:46.753Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745056211-yiffny": {
+      "taskId": "task-1772745056211-yiffny",
+      "type": "feature",
+      "description": "Advanced Memory - Cross-session learning with AgentDB HNSW for persistent memory patterns and intelligent context ranking",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "contexto-memory"
+      ],
+      "tags": [
+        "memory",
+        "learning",
+        "contexto"
+      ],
+      "createdAt": "2026-03-05T21:10:56.211Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745058139-k8tmyx": {
+      "taskId": "task-1772745058139-k8tmyx",
+      "type": "feature",
+      "description": "Testing Suite - Comprehensive validation following ADW methodology with confidence-scored quality gates",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "contexto-tester"
+      ],
+      "tags": [
+        "testing",
+        "validation",
+        "contexto"
+      ],
+      "createdAt": "2026-03-05T21:10:58.139Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745060028-qlw0qa": {
+      "taskId": "task-1772745060028-qlw0qa",
+      "type": "feature",
+      "description": "Integration Coordination - Ensure architecture consistency and quality gates across all contexto plugin components",
+      "priority": "critical",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "contexto-coordinator"
+      ],
+      "tags": [
+        "coordination",
+        "quality",
+        "contexto"
+      ],
+      "createdAt": "2026-03-05T21:11:00.028Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745061508-eclmso": {
+      "taskId": "task-1772745061508-eclmso",
+      "type": "research",
+      "description": "Context Intelligence - Research ADW methodology patterns and develop intelligent context discovery algorithms for RLMgw integration",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "contexto-researcher"
+      ],
+      "tags": [
+        "research",
+        "intelligence",
+        "contexto"
+      ],
+      "createdAt": "2026-03-05T21:11:01.508Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745859923-8s9rs4": {
+      "taskId": "task-1772745859923-8s9rs4",
+      "type": "implementation",
+      "description": "Contexto Plugin: RLMgw + Ruflo V3 hybrid context engine with 98%+ completeness, <100ms cached responses, and 4.75x performance improvement",
+      "priority": "critical",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "coordinator-mmdz3r3t"
+      ],
+      "tags": [],
+      "createdAt": "2026-03-05T21:24:19.923Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772745983269-5tvjpk": {
+      "taskId": "task-1772745983269-5tvjpk",
+      "type": "research",
+      "description": "Research RLMgw and ADW patterns for contexto integration points",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "researcher-mmdz3u7l"
+      ],
+      "tags": [],
+      "createdAt": "2026-03-05T21:26:23.269Z",
+      "startedAt": null,
+      "completedAt": null
+    }
+  },
+  "version": "3.0.0"
+}

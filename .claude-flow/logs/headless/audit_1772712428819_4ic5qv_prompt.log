@@ -1,0 +1,950 @@
+[2026-03-05T12:07:08.877Z] PROMPT
+============================================================
+Analyze this codebase for security vulnerabilities:
+- Check for hardcoded secrets (API keys, passwords)
+- Identify SQL injection risks
+- Find XSS vulnerabilities
+- Check for insecure dependencies
+- Identify authentication/authorization issues
+
+Provide a JSON report with:
+{
+  "vulnerabilities": [{ "severity": "high|medium|low", "file": "...", "line": N, "description": "..." }],
+  "riskScore": 0-100,
+  "recommendations": ["..."]
+}
+
+## Codebase Context
+
+--- gcc/GCC/bin/aline-mcp.js ---
+#!/usr/bin/env node
+
+import { spawn, execSync } from "child_process";
+import { platform } from "os";
+
+const isWindows = platform() === "win32";
+
+function checkUvxInstalled() {
+  try {
+    execSync(isWindows ? "where uvx" : "which uvx", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function installUv() {
+  console.error("Installing uv (Python package manager)...");
+  try {
+    if (isWindows) {
+      execSync("powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"", {
+        stdio: "inherit",
+      });
+    } else {
+      execSync("curl -LsSf https://astral.sh/uv/install.sh | sh", {
+        stdio: "inherit",
+        shell: true,
+      });
+    }
+    // Add to PATH for current session
+    const homeDir = process.env.HOME || process.env.USERPROFILE;
+    if (!isWindows) {
+      process.env.PATH = `${homeDir}/.local/bin:${process.env.PATH}`;
+    }
+    return true;
+  } catch (err) {
+    console.error("Failed to install uv:", err.message);
+    return false;
+  }
+}
+
+async function main() {
+  console.error("[aline-ai npm wrapper] Starting...");
+
+  // Check if uvx is available, install if not
+  if (!checkUvxInstalled()) {
+    console.error("uvx not found. Attempting automatic installation...");
+    if (!installUv()) {
+      console.error("\nPlease install uv manually:");
+      console.error("  curl -LsSf https://astral.sh/uv/install.sh | sh");
+      process.exit(1);
+    }
+    console.error("uv installed successfully!\n");
+  }
+
+  // Run aline-mcp via uvx
+  const uvxCommand = isWindows ? "uvx.cmd" : "uvx";
+  // Use --refresh to ensure latest version is downloaded
+  const args = ["--refresh", "--from", "aline-ai", "aline-mcp", ...process.argv.slice(2)];
+
+  console.error(`[aline-ai npm wrapper] Running: ${uvxCommand} ${args.join(" ")}`);
+
+  const child = spawn(uvxCommand, args, {
+    stdio: "inherit",
+    shell: isWindows,
+    env: process.env,
+  });
+
+  child.on("error", (err) => {
+    if (err.code === "ENOENT") {
+      console.error("Error: uvx still not found after installation.");
+      console.error("Please restart your terminal and try again.");
+      process.exit(1);
+    }
+    console.error("Error spawning uvx:", err.message);
+    process.exit(1);
+  });
+
+  child.on("exit", (code) => {
+    process.exit(code ?? 0);
+  });
+}
+
+main();
+
+
+--- rlmgw/docs/next.config.js ---
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  basePath: '/rlm',
+  trailingSlash: true,
+  images: { unoptimized: true },
+};
+
+module.exports = nextConfig;
+
+
+
+--- rlmgw/docs/postcss.config.js ---
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+
+
+
+--- rlmgw/docs/src/lib/utils.ts ---
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+
+--- rlmgw/docs/tailwind.config.ts ---
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
+    },
+  },
+  plugins: [],
+};
+export default config;
+
+
+
+--- rlmgw/visualizer/next.config.ts ---
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+
+
+--- rlmgw/visualizer/src/lib/parse-logs.ts (truncated) ---
+import { RLMIteration, RLMLogFile, LogMetadata, RLMConfigMetadata, extractFinalAnswer } from './types';
+
+// Extract the context variable from code block locals
+export function extractContextVariable(iterations: RLMIteration[]): string | null {
+  for (const iter of iterations) {
+    for (const block of iter.code_blocks) {
+      if (block.result?.locals?.context) {
+        const ctx = block.result.locals.context;
+        if (typeof ctx === 'string') {
+          return ctx;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// Default config when metadata is not present (backwards compatibility)
+function getDefaultConfig(): RLMConfigMetadata {
+  return {
+    root_model: null,
+    max_depth: null,
+    max_iterations: null,
+    backend: null,
+    backend_kwargs: null,
+    environment_type: null,
+    environment_kwargs: null,
+    other_backends: null,
+  };
+}
+
+export interface ParsedJSONL {
+  iterations: RLMIteration[];
+  config: RLMConfigMetadata;
+}
+
+export function parseJSONL(content: string): ParsedJSONL {
+  const lines = content.trim().split('\n').filter(line => line.trim());
+  const iterations: RLMIteration[] = [];
+  let config: RLMConfigMetadata = getDefaultConfig();
+  
+  for (const line of lines) {
+    try {
+      const parsed = JSON.parse(line);
+      
+      // Check if this is a metadata entry
+      if (parsed.type === 'metadata') {
+        config = {
+          root_model: parsed.root_model ?? null,
+          max_depth: parsed.max_depth ?? null,
+          max_iterations: parsed.max_iterations ?? null,
+          backend: parsed.backend ?? null,
+          backend_kwargs: parsed.backend_kwargs ?? null,
+          environment_type: parsed.environment_type ?? null,
+          environment_kwargs: parsed.environment_kwargs ?? null,
+          other_backends: parsed.other_backends ?? null,
+        };
+      } else {
+        // This is an iteration entry
+        iterations.push(parsed as RLMIteration);
+      }
+    } catch (e) {
+      console.error('Failed to parse line:', line, e);
+    }
+  }
+  
+  return { iterations, config };
+}
+
+export function extractContextQuestion(iterations: RLMIteration[]): string {
+  if (iterations.length === 0) return 'No context found';
+  
+  const firstIteration = iterations[0];
+  const prompt = firstIteration.prompt;
+  
+  // Look for user message that contains the actual question
+  for (const msg of prompt) {
+    if (msg.role === 'user' && msg.content) {
+      // Try to extract quoted query
+      const queryMatch = msg.content.match(/original query: "([^"]+)"/);
+      if (queryMatch) {
+        return queryMatch[1];
+      }
+      
+      // Check if it contains the actual query pattern
+      if (msg.content.includes('answer the prompt')) {
+        continue;
+      }
+      
+      // Take first substantial user message
+      if (msg.content.length > 50 && msg.content.length < 500) {
+        return msg.content.slice(0, 200) + (msg.content.length > 200 ? '...' : '');
+      }
+    }
+  }
+  
+  // Fallback: look in system prompt for context info
+  const systemMsg = prompt.find(m => m.role === 'system');
+  if (systemMsg?.content) {
+    const contextMatch = systemMsg.content.match(/context variable.*?:(.*?)(?:\n|$)/i);
+    if (contextMatch) {
+      return contextMatch[1].trim().slice(0, 200);
+    }
+  }
+  
+  // Check code block output for actual context
+  for (const iter of iterations) {
+    for (const block of iter.code_blocks) {
+      if (block.result?.locals?.context) {
+        const ctx = block.result.locals.context;
+        if (typeof ctx === 'string' && ctx.length < 500) {
+          return ctx;
+        }
+      }
+    }
+  }
+  
+  return 'Context available in REPL environment';
+}
+
+export function computeMetadata(iterations: RLMIteration[]): LogMetadata {
+  let totalCodeBlocks = 0;
+  let totalSubLMCalls = 0;
+  let totalExecutionTime = 0;
+  let hasErrors = false;
+  let finalAnswer: string | null = null;
+  
+  for (const iter of iterations) {
+    totalCodeBlocks += iter.code_blocks.length;
+    
+    // Use iteration_time if available, otherwise sum code block times
+    if (iter.iteration_time != null) {
+      totalExecutionTime += iter.iteration_time;
+    } else {
+      for (const block of iter.code_blocks) {
+        if (block.result) {
+          totalExecutionTime += block.result.execution_time || 0;
+        }
+      }
+    }
+    
+    for (const block of iter.code_blocks) {
+      if (block.result) {
+        if (block.result.stderr) {
+          hasErrors = true;
+        }
+        if (block.result.rlm_calls) {
+          totalSubLMCalls += block.result.rlm_calls.length;
+        }
+      }
+    }
+    
+    if (iter.final_answer) {
+      finalAnswer = extractFinalAnswer(iter.final_answer);
+    }
+  }
+  
+  return {
+    totalIterations: iterations.length,
+    totalCodeBlocks,
+    totalSubLMCalls,
+    contextQuestion: extractContextQuestion(iterations),
+    finalAnswer,
+    totalExecutionTime,
+    hasErrors,
+  };
+}
+
+export function parseLogFile(fileName: string, content: string): RLMLogFile {
+  const { iterations, config } = p
+
+--- rlmgw/visualizer/src/lib/types.ts ---
+// Types matching the RLM log format
+
+export interface RLMChatCompletion {
+  prompt: string | Record<string, unknown>;
+  response: string;
+  prompt_tokens: number;
+  completion_tokens: number;
+  execution_time: number;
+}
+
+export interface REPLResult {
+  stdout: string;
+  stderr: string;
+  locals: Record<string, unknown>;
+  execution_time: number;
+  rlm_calls: RLMChatCompletion[];
+}
+
+export interface CodeBlock {
+  code: string;
+  result: REPLResult;
+}
+
+export interface RLMIteration {
+  type?: string;
+  iteration: number;
+  timestamp: string;
+  prompt: Array<{ role: string; content: string }>;
+  response: string;
+  code_blocks: CodeBlock[];
+  final_answer: string | [string, string] | null;
+  iteration_time: number | null;
+}
+
+// Metadata saved at the start of a log file about RLM configuration
+export interface RLMConfigMetadata {
+  root_model: string | null;
+  max_depth: number | null;
+  max_iterations: number | null;
+  backend: string | null;
+  backend_kwargs: Record<string, unknown> | null;
+  environment_type: string | null;
+  environment_kwargs: Record<string, unknown> | null;
+  other_backends: string[] | null;
+}
+
+export interface RLMLogFile {
+  fileName: string;
+  filePath: string;
+  iterations: RLMIteration[];
+  metadata: LogMetadata;
+  config: RLMConfigMetadata;
+}
+
+export interface LogMetadata {
+  totalIterations: number;
+  totalCodeBlocks: number;
+  totalSubLMCalls: number;
+  contextQuestion: string;
+  finalAnswer: string | null;
+  totalExecutionTime: number;
+  hasErrors: boolean;
+}
+
+export function extractFinalAnswer(answer: string | [string, string] | null): string | null {
+  if (!answer) return null;
+  if (Array.isArray(answer)) {
+    return answer[1];
+  }
+  return answer;
+}
+
+
+
+--- rlmgw/visualizer/src/lib/utils.ts ---
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+
+--- jlma-FACT/.env.example ---
+# Arcade.dev Integration Configuration
+# Copy this file to .env and configure with your actual values
+
+# ==============================================================================
+# ARCADE.DEV CONFIGURATION
+# ==============================================================================
+
+# Arcade.dev API credentials
+ARCADE_API_KEY=your_arcade_api_key_here
+ARCADE_API_SECRET=your_arcade_api_secret_here
+
+# Arcade.dev API endpoints
+ARCADE_API_URL=https://api.arcade.dev
+ARCADE_API_VERSION=v1
+
+# Connection settings
+ARCADE_TIMEOUT=30
+ARCADE_MAX_RETRIES=3
+ARCADE_RETRY_DELAY=1
+
+# Rate limiting
+ARCADE_RATE_LIMIT_REQUESTS=100
+ARCADE_RATE_LIMIT_WINDOW=60
+
+# ==============================================================================
+# FACT FRAMEWORK CONFIGURATION
+# ==============================================================================
+
+# Logging configuration
+FACT_LOG_LEVEL=INFO
+FACT_LOG_FORMAT=json
+FACT_LOG_FILE=logs/fact.log
+
+# Cache configuration
+FACT_CACHE_ENABLED=true
+FACT_CACHE_TYPE=redis
+FACT_CACHE_TTL=3600
+FACT_CACHE_MAX_SIZE=1000
+FACT_CACHE_HOST=localhost
+FACT_CACHE_PORT=6379
+FACT_CACHE_DB=0
+
+# Database configuration
+FACT_DB_TYPE=postgresql
+FACT_DB_HOST=localhost
+FACT_DB_PORT=5432
+FACT_DB_NAME=fact_db
+FACT_DB_USER=fact_user
+FACT_DB_PASSWORD=your_db_password
+
+# Security settings
+FACT_SECRET_KEY=your_secret_key_here
+FACT_ENCRYPTION_KEY=your_encryption_key_here
+FACT_JWT_SECRET=your_jwt_secret_here
+
+# ==============================================================================
+# TESTING CONFIGURATION
+# ==============================================================================
+
+# Test environment settings
+TEST_ARCADE_API_KEY=your_test_api_key_here
+TEST_DB_NAME=fact_test_db
+TEST_CACHE_ENABLED=false
+TEST_LOG_LEVEL=DEBUG
+
+# Test data paths
+TEST_DATA_DIR=test_data
+TEST_OUTPUT_DIR=test_output
+
+# ==============================================================================
+# DEVELOPMENT CONFIGURATION
+# ==============================================================================
+
+# Development mode settings
+DEVELOPMENT_MODE=false
+DEBUG_ENABLED=false
+PROFILING_ENABLED=false
+
+# Hot reload settings
+AUTO_RELOAD=false
+WATCH_FILES=true
+
+# ==============================================================================
+# DEPLOYMENT CONFIGURATION
+# ==============================================================================
+
+# Environment identifier
+ENVIRONMENT=development
+DEPLOYMENT_STAGE=local
+
+# Monitoring and observability
+METRICS_ENABLED=false
+TRACING_ENABLED=false
+HEALTH_CHECK_ENABLED=true
+
+# External service URLs
+WEBHOOK_URL=https://your-webhook-url.com/webhook
+NOTIFICATION_SERVICE_URL=https://your-notification-service.com
+
+# ==============================================================================
+# ARCADE.DEV FEATURE FLAGS
+# ==============================================================================
+
+# Enable/disable specific Arcade.dev features
+ARCADE_CODE_ANALYSIS_ENABLED=true
+ARCADE_TEST_GENERATION_ENABLED=true
+ARCADE_DOCUMENTATION_ENABLED=true
+ARCADE_REFACTORING_ENABLED=true
+ARCADE_BUG_DETECTION_ENABLED=true
+ARCADE_PERFORMANCE_ANALYSIS_ENABLED=true
+
+# Feature-specific settings
+ARCADE_MAX_ANALYSIS_SIZE=1000000
+ARCADE_PARALLEL_REQUESTS=5
+ARCADE_BATCH_SIZE=10
+
+# ==============================================================================
+# INTEGRATION SETTINGS
+# ==============================================================================
+
+# Third-party integrations
+GITHUB_TOKEN=your_github_token_here
+GITLAB_TOKEN=your_gitlab_token_here
+SLACK_WEBHOOK_URL=your_slack_webhook_url_here
+
+# CI/CD integration
+CI_INTEGRATION_ENABLED=false
+AUTO_DEPLOYMENT_ENABLED=false
+QUALITY_GATE_ENABLED=true
+
+# ==============================================================================
+# PERFORMANCE TUNING
+# ==============================================================================
+
+# Worker and thread settings
+MAX_WORKERS=4
+THREAD_POOL_SIZE=10
+CONNECTION_POOL_SIZE=20
+
+# Timeout settings
+HTTP_TIMEOUT=30
+DB_TIMEOUT=10
+CACHE_TIMEOUT=5
+
+# Memory limits
+MAX_MEMORY_USAGE=1024
+MAX_FILE_SIZE=50
+
+# ==============================================================================
+# SECURITY CONFIGURATION
+# ==============================================================================
+
+# SSL/TLS settings
+SSL_VERIFY=true
+SSL_CERT_PATH=certs/cert.pem
+SSL_KEY_PATH=certs/key.pem
+
+# API security
+API_KEY_HEADER=X-API-Key
+CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Session settings
+SESSION_TIMEOUT=3600
+SESSION_SECURE=true
+SESSION_HTTPONLY=true
+
+--- jlma-FACT/.env.template (truncated) ---
+# FACT System Environment Configuration Template
+# ============================================
+# 
+# Instructions:
+# 1. Copy this file to .env
+# 2. Replace all placeholder values with your actual configuration
+# 3. Never commit .env with real API keys to version control
+#
+# For production deployments, create environment-specific files:
+# - .env.local (local development)
+# - .env.staging (staging environment) 
+# - .env.production (production environment)
+
+# =============================================================================
+# REQUIRED API KEYS (Must be configured before system startup)
+# =============================================================================
+
+# Anthropic Claude API Key (REQUIRED)
+# Format: sk-ant-api03-[alphanumeric string]
+# Get from: https://console.anthropic.com/
+# Validation: System will validate format on startup
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Arcade AI API Key (REQUIRED)
+# Format: arc_[alphanumeric string] 
+# Get from: https://arcade-ai.com/dashboard
+# Validation: System will validate format on startup
+ARCADE_API_KEY=your_arcade_api_key_here
+
+# =============================================================================
+# OPTIONAL API KEYS
+# =============================================================================
+
+# OpenAI API Key (Optional - for extended LLM capabilities)
+# Format: sk-proj-[alphanumeric string]
+# Get from: https://platform.openai.com/api-keys
+# Uncomment to enable OpenAI integration
+# OPENAI_API_KEY=your_openai_api_key_here
+
+# Encryption Key (Optional - for sensitive data encryption)
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Uncomment to enable data encryption
+# ENCRYPTION_KEY=your_base64_encoded_encryption_key_here
+
+# Cache Encryption Key (Optional - for cache encryption)
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Uncomment to enable cache encryption
+# CACHE_ENCRYPTION_KEY=your_base64_encoded_cache_encryption_key_here
+
+# =============================================================================
+# SYSTEM CONFIGURATION
+# =============================================================================
+
+# Arcade AI Service Configuration
+# Default: https://api.arcade-ai.com
+ARCADE_BASE_URL=https://api.arcade-ai.com
+
+# Database Configuration
+# Path: Relative to project root or absolute path
+# Default: data/fact_demo.db
+DATABASE_PATH=data/fact_demo.db
+
+# Claude Model Configuration
+# Options: claude-3-5-sonnet-20241022, claude-3-haiku-20240307, claude-3-opus-20240229
+# Default: claude-3-5-sonnet-20241022
+CLAUDE_MODEL=claude-3-5-sonnet-20241022
+
+# System Prompt (Optional override)
+# Default: "You are a deterministic finance assistant. When uncertain, request data via tools."
+SYSTEM_PROMPT=You are a deterministic finance assistant. When uncertain, request data via tools.
+
+# Request Configuration
+# MAX_RETRIES: Range 1-10, Default: 3
+MAX_RETRIES=3
+# REQUEST_TIMEOUT: Range 5-300 seconds, Default: 30
+REQUEST_TIMEOUT=30
+
+# Logging Configuration
+# Options: DEBUG, INFO, WARNING, ERROR
+# Default: INFO
+LOG_LEVEL=INFO
+
+# =============================================================================
+# CACHE CONFIGURATION
+# =============================================================================
+
+# Cache Settings
+# CACHE_PREFIX: Alphanumeric + underscore, Length 1-50
+CACHE_PREFIX=fact_v1
+
+# CACHE_MIN_TOKENS: Range 1-1000 tokens, Default: 50
+CACHE_MIN_TOKENS=50
+
+# CACHE_MAX_SIZE: Format [number][KMGT]B, Range 1MB-10GB, Default: 100MB
+CACHE_MAX_SIZE=100MB
+
+# CACHE_TTL_SECONDS: Range 60-86400 seconds, Default: 3600 (1 hour)
+CACHE_TTL_SECONDS=3600
+
+# Performance targets in milliseconds
+# CACHE_HIT_TARGET_MS: Default: 50.0
+CACHE_HIT_TARGET_MS=50.0
+# CACHE_MISS_TARGET_MS: Default: 200.0
+CACHE_MISS_TARGET_MS=200.0
+
+# =============================================================================
+# SECURITY CONFIGURATION
+# =============================================================================
+
+# Security Modes
+# DEBUG_MODE: Enable debug features (false for production)
+DEBUG_MODE=false
+# STRICT_MODE: Enable strict validation (true for production)
+STRICT_MODE=true
+# ENFORCE_HTTPS: Require HTTPS connections (true for production)
+ENFORCE_HTTPS=true
+
+# Rate Limiting
+# RATE_LIMITING_ENABLED: Enable rate limiting (true for production)
+RATE_LIMITING_ENABLED=true
+# Rate limits per minute
+RATE_LIMIT_USER_PER_MINUTE=60
+RATE_LIMIT_TOOL_PER_MINUTE=30
+RATE_LIMIT_AUTH_PER_MINUTE=5
+
+# Input Validation
+# VALIDATION_MAX_STRING_LENGTH: Maximum input string length
+VALIDATION_MAX_STRING_LENGTH=10000
+# VALIDATION_ALLOW_HTML: Allow HTML in inputs (false for security)
+VALIDATION_ALLOW_HTML=false
+# VALIDATION_ALLOW_JAVASCRIPT: Allow JavaScript in inputs (false for security)
+VALIDATION_ALLOW_JAVASCRIPT=false
+
+# Security Logging
+# LOG_SECURITY_EVENTS: Enable security event logging
+LOG_SECURITY_EVENTS=true
+# SECURITY_LOG_LEVEL: Security log lev
+
+--- jlma-FACT/examples/arcade-dev/.env.example ---
+# Arcade.dev Integration Examples - Environment Configuration
+# Copy this file to .env and configure with your actual values
+
+# Required Configuration
+# =====================
+
+# Arcade.dev API Key (Required)
+# Get this from your Arcade.dev dashboard
+ARCADE_API_KEY=your_arcade_api_key_here
+
+# Optional Configuration
+# =====================
+
+# Arcade.dev API URL (Optional)
+# Default: https://api.arcade.dev
+ARCADE_API_URL=https://api.arcade.dev
+
+# Arcade.dev Request Timeout in seconds (Optional)
+# Default: 30
+ARCADE_TIMEOUT=30
+
+# Arcade.dev Maximum Retries (Optional)
+# Default: 3
+ARCADE_MAX_RETRIES=3
+
+# FACT Framework Log Level (Optional)
+# Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+# Default: INFO
+FACT_LOG_LEVEL=INFO
+
+# FACT Cache Enable/Disable (Optional)
+# Options: true, false
+# Default: true
+FACT_CACHE_ENABLED=true
+
+# Additional Optional Configuration
+# ================================
+
+# Arcade.dev Workspace ID (Optional)
+# Required for some advanced features
+ARCADE_WORKSPACE_ID=your_workspace_id
+
+# Redis Configuration for Caching (Optional)
+# Required only if using Redis-based caching
+REDIS_URL=redis://localhost:6379
+CACHE_TTL=3600
+
+# Monitoring Configuration (Optional)
+# Required only if using monitoring features
+ENABLE_METRICS=true
+METRICS_ENDPOINT=http://localhost:8080/metrics
+
+# Security Configuration (Optional)
+# Advanced security settings
+ENABLE_AUDIT_LOGGING=true
+MAX_REQUEST_SIZE=10485760
+RATE_LIMIT_REQUESTS=100
+RATE_LIMIT_WINDOW=60
+
+# Development Configuration (Optional)
+# For development and debugging
+DEBUG_MODE=false
+VERBOSE_LOGGING=false
+ENABLE_PROFILING=false
+
+--- gcc/GCC/package.json ---
+{
+  "name": "aline-ai",
+  "version": "0.5.3",
+  "description": "Aline MCP Server - AI Agent Chat Session Tracker",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "chat-history",
+    "claude",
+    "session-tracking",
+    "context-preservation"
+  ],
+  "author": "human-re",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/human-re/aline"
+  },
+  "homepage": "https://github.com/human-re/aline#readme",
+  "bugs": {
+    "url": "https://github.com/human-re/aline/issues"
+  },
+  "bin": {
+    "aline-ai": "./bin/aline-mcp.js"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module"
+}
+
+
+--- jlma-FACT/fact-memory/src/package.json ---
+{
+  "name": "fact-memory-mcp",
+  "version": "1.0.0",
+  "description": "FACT Memory System MCP Server - Mem0-inspired memory management using FACT SDK prompt caching",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "npx fastmcp dev index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "inspect": "npx fastmcp inspect index.ts"
+  },
+  "dependencies": {
+    "fastmcp": "^2.1.3",
+    "zod": "^3.22.4",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "memory",
+    "ai",
+    "fact",
+    "caching",
+    "mem0"
+  ],
+  "author": "FACT Team",
+  "license": "MIT"
+}
+
+--- rlmgw/docs/package.json ---
+{
+  "name": "rlm-docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.0.0",
+    "lucide-react": "^0.294.0",
+    "@radix-ui/react-scroll-area": "^1.0.5",
+    "@radix-ui/react-tabs": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.0.0"
+  }
+}
+
+
+
+--- rlmgw/visualizer/package.json ---
+{
+  "name": "visualizer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.12",
+    "@radix-ui/react-collapsible": "^1.1.12",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-scroll-area": "^1.2.10",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.1",
+    "next-themes": "^0.4.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-resizable-panels": "^4.0.15",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1",
+    "tailwindcss": "^4",
+    "tw-animate-css": "^1.4.0",
+    "typescript": "^5"
+  }
+}
+
+
+## Instructions
+
+Analyze the above codebase context and provide your response following the format specified in the task.
