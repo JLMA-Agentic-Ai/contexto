@@ -1,0 +1,17 @@
+{
+  "repository": {
+    "path": "/workspaces/jlmaworkspace/new_projects/new_ideas/contexto",
+    "name": "contexto"
+  },
+  "investigationQuestion": "¿Cuál es el impacto de cambiar la función authenticate() para soporte multi-factor?",
+  "testCases": [
+    "Análisis de impacto de refactoring",
+    "Auditoría de deuda técnica",
+    "Comprensión de flujo de autenticación"
+  ],
+  "metrics": {
+    "timeThreshold": 300,
+    "accuracyTarget": 0.85,
+    "coverageTarget": 0.9
+  }
+}

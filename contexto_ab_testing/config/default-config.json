@@ -1,0 +1,54 @@
+{
+  "repository": {
+    "name": "contexto",
+    "path": "/workspaces/jlmaworkspace/new_projects/new_ideas/contexto",
+    "description": "Proyecto principal con GitNexus + RLM Navigator"
+  },
+  "investigationQuestion": "¿Qué impacto tendría cambiar la función authenticate() para soportar multi-factor authentication?",
+  "testCases": [
+    {
+      "name": "Análisis de Impacto de Refactoring",
+      "question": "¿Qué impacto tendría cambiar la función authenticate() para soportar multi-factor authentication?",
+      "expectedTimeTraditional": 15000,
+      "expectedTimeExperimental": 5000,
+      "complexity": "medium"
+    },
+    {
+      "name": "Auditoría de Deuda Técnica",
+      "question": "¿Qué patrones de deuda técnica existen en este repositorio?",
+      "expectedTimeTraditional": 25000,
+      "expectedTimeExperimental": 8000,
+      "complexity": "high"
+    },
+    {
+      "name": "Comprensión de Flujo de Autenticación",
+      "question": "¿Cómo funciona el flujo completo de autenticación en la aplicación?",
+      "expectedTimeTraditional": 35000,
+      "expectedTimeExperimental": 12000,
+      "complexity": "high"
+    }
+  ],
+  "metrics": {
+    "timeThreshold": 300000,
+    "accuracyTarget": 0.85,
+    "coverageTarget": 0.90,
+    "confidenceThreshold": 0.80
+  },
+  "swarmConfig": {
+    "control": {
+      "topology": "flat",
+      "maxAgents": 3,
+      "strategy": "general-purpose"
+    },
+    "experimental": {
+      "topology": "hierarchical",
+      "maxAgents": 4,
+      "strategy": "specialized"
+    }
+  },
+  "dashboardConfig": {
+    "port": 8080,
+    "updateInterval": 1000,
+    "maxHistoryEntries": 100
+  }
+}
