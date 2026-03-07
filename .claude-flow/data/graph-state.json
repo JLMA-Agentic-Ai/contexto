@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "updatedAt": 1772884001711,
+  "nodeCount": 3,
+  "nodes": {
+    "mem-MEMORY-project--contexto": {
+      "id": "mem-MEMORY-project--contexto",
+      "category": "core",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1772884001709
+    },
+    "mem-MEMORY-key-patterns": {
+      "id": "mem-MEMORY-key-patterns",
+      "category": "core",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1772884001709
+    },
+    "mem-MEMORY-recent-activities": {
+      "id": "mem-MEMORY-recent-activities",
+      "category": "core",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1772884001709
+    }
+  },
+  "edges": [
+    {
+      "sourceId": "mem-MEMORY-project--contexto",
+      "targetId": "mem-MEMORY-key-patterns",
+      "type": "temporal",
+      "weight": 0.5
+    },
+    {
+      "sourceId": "mem-MEMORY-key-patterns",
+      "targetId": "mem-MEMORY-recent-activities",
+      "type": "temporal",
+      "weight": 0.5
+    }
+  ],
+  "pageRanks": {
+    "mem-MEMORY-project--contexto": 0.18441687554671382,
+    "mem-MEMORY-key-patterns": 0.34117100648207443,
+    "mem-MEMORY-recent-activities": 0.4744121179712115
+  }
+}

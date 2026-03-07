@@ -1,0 +1,41 @@
+[
+  {
+    "id": "mem-MEMORY-project--contexto",
+    "key": "project-contexto",
+    "content": "- Repository: GitNexus integration with RLM Navigator\n- Architecture: Domain-Driven Design with event sourcing\n- Current branch: new/gitnexus-rlmnavigator",
+    "summary": "Project: Contexto",
+    "namespace": "core",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/workspaces/jlmaworkspace/new_projects/new_ideas/contexto/.claude/memory/MEMORY.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1772884001709
+  },
+  {
+    "id": "mem-MEMORY-key-patterns",
+    "key": "key-patterns",
+    "content": "- Use hierarchical swarm topology for complex tasks\n- Keep agents under 8 for tight coordination\n- Follow TDD London School for new code",
+    "summary": "Key Patterns",
+    "namespace": "core",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/workspaces/jlmaworkspace/new_projects/new_ideas/contexto/.claude/memory/MEMORY.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1772884001709
+  },
+  {
+    "id": "mem-MEMORY-recent-activities",
+    "key": "recent-activities",
+    "content": "- Extracted RLM Navigator package\n- Initialized hierarchical swarm\n- Working with GitNexus and RLM Navigator integration\n\n---\n*This file is automatically updated by Claude Code hooks*",
+    "summary": "Recent Activities",
+    "namespace": "core",
+    "type": "semantic",
+    "metadata": {
+      "sourceFile": "/workspaces/jlmaworkspace/new_projects/new_ideas/contexto/.claude/memory/MEMORY.md",
+      "bootstrapped": true
+    },
+    "createdAt": 1772884001709
+  }
+]
