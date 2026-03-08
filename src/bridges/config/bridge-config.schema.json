@@ -1,0 +1,380 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bridge Configuration Schema",
+  "type": "object",
+  "properties": {
+    "bridges": {
+      "type": "object",
+      "properties": {
+        "dossier": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "default": "DossierBridge" },
+            "version": { "type": "string", "default": "1.0.0" },
+            "enabled": { "type": "boolean", "default": true },
+            "timeout": { "type": "number", "default": 30000 },
+            "retryAttempts": { "type": "number", "default": 3 },
+            "circuitBreakerThreshold": { "type": "number", "default": 5 },
+            "healthCheckInterval": { "type": "number", "default": 60000 },
+            "dossierApi": {
+              "type": "object",
+              "properties": {
+                "baseUrl": { "type": "string" },
+                "apiKey": { "type": "string" },
+                "version": { "type": "string", "default": "v1" }
+              },
+              "required": ["baseUrl", "apiKey"]
+            },
+            "ui": {
+              "type": "object",
+              "properties": {
+                "webSocketUrl": { "type": "string" },
+                "theme": { "enum": ["light", "dark", "auto"], "default": "auto" },
+                "refreshInterval": { "type": "number", "default": 5000 }
+              },
+              "required": ["webSocketUrl"]
+            },
+            "orchestration": {
+              "type": "object",
+              "properties": {
+                "maxConcurrentTasks": { "type": "number", "default": 10 },
+                "taskTimeout": { "type": "number", "default": 300000 },
+                "priorityLevels": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "default": ["low", "medium", "high", "critical"]
+                }
+              }
+            }
+          },
+          "required": ["dossierApi", "ui"]
+        },
+        "ruflo": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "default": "RufloBridge" },
+            "version": { "type": "string", "default": "1.0.0" },
+            "enabled": { "type": "boolean", "default": true },
+            "timeout": { "type": "number", "default": 30000 },
+            "retryAttempts": { "type": "number", "default": 3 },
+            "circuitBreakerThreshold": { "type": "number", "default": 5 },
+            "healthCheckInterval": { "type": "number", "default": 60000 },
+            "rufloApi": {
+              "type": "object",
+              "properties": {
+                "baseUrl": { "type": "string" },
+                "apiKey": { "type": "string" },
+                "version": { "type": "string", "default": "v3" }
+              },
+              "required": ["baseUrl", "apiKey"]
+            },
+            "swarm": {
+              "type": "object",
+              "properties": {
+                "topology": { "enum": ["hierarchical", "mesh", "hybrid"], "default": "hierarchical" },
+                "maxAgents": { "type": "number", "default": 15 },
+                "strategy": { "enum": ["balanced", "specialized", "adaptive"], "default": "specialized" },
+                "consensus": { "enum": ["raft", "pbft", "simple"], "default": "raft" }
+              }
+            },
+            "memory": {
+              "type": "object",
+              "properties": {
+                "type": { "enum": ["local", "distributed", "hybrid"], "default": "hybrid" },
+                "hnswEnabled": { "type": "boolean", "default": true },
+                "vectorDimensions": { "type": "number", "default": 768 },
+                "maxMemorySize": { "type": "number", "default": 1073741824 }
+              }
+            },
+            "neural": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean", "default": true },
+                "modelRouting": { "type": "boolean", "default": true },
+                "tierStrategy": { "enum": ["3-tier", "dynamic"], "default": "3-tier" }
+              }
+            }
+          },
+          "required": ["rufloApi"]
+        },
+        "adwSkills": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "default": "ADWSkillsBridge" },
+            "version": { "type": "string", "default": "1.0.0" },
+            "enabled": { "type": "boolean", "default": true },
+            "timeout": { "type": "number", "default": 30000 },
+            "retryAttempts": { "type": "number", "default": 3 },
+            "circuitBreakerThreshold": { "type": "number", "default": 5 },
+            "healthCheckInterval": { "type": "number", "default": 60000 },
+            "methodology": {
+              "type": "object",
+              "properties": {
+                "version": { "type": "string", "default": "2.0" },
+                "strictMode": { "type": "boolean", "default": false },
+                "evidenceThreshold": { "type": "number", "default": 0.7 },
+                "hypothesisLifetime": { "type": "number", "default": 604800000 }
+              }
+            },
+            "investigation": {
+              "type": "object",
+              "properties": {
+                "maxParallelInvestigations": { "type": "number", "default": 5 },
+                "defaultTimeout": { "type": "number", "default": 3600000 },
+                "evidenceStorage": { "enum": ["local", "distributed", "hybrid"], "default": "local" }
+              }
+            },
+            "skills": {
+              "type": "object",
+              "properties": {
+                "enabledSkills": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "default": ["observe_system_behavior", "analyze_logs", "trace_execution"]
+                },
+                "skillRegistry": { "type": "string", "default": "default" },
+                "autoDiscovery": { "type": "boolean", "default": true }
+              }
+            },
+            "workflow": {
+              "type": "object",
+              "properties": {
+                "templates": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "default": ["basic_investigation", "security_analysis", "performance_debugging"]
+                },
+                "customSteps": { "type": "boolean", "default": true },
+                "approvalRequired": { "type": "boolean", "default": false }
+              }
+            }
+          }
+        },
+        "gitNexus": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "default": "GitNexusBridge" },
+            "version": { "type": "string", "default": "1.0.0" },
+            "enabled": { "type": "boolean", "default": true },
+            "timeout": { "type": "number", "default": 30000 },
+            "retryAttempts": { "type": "number", "default": 3 },
+            "circuitBreakerThreshold": { "type": "number", "default": 5 },
+            "healthCheckInterval": { "type": "number", "default": 60000 },
+            "database": {
+              "type": "object",
+              "properties": {
+                "kuzuPath": { "type": "string", "default": "./data/kuzu" },
+                "connectionPool": { "type": "number", "default": 5 },
+                "queryTimeout": { "type": "number", "default": 30000 },
+                "maxMemory": { "type": "string", "default": "2GB" }
+              }
+            },
+            "indexing": {
+              "type": "object",
+              "properties": {
+                "autoIndexing": { "type": "boolean", "default": true },
+                "indexInterval": { "type": "number", "default": 3600000 },
+                "parallelWorkers": { "type": "number", "default": 4 },
+                "supportedLanguages": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "default": ["typescript", "javascript", "python", "java", "go", "rust"]
+                }
+              }
+            },
+            "analysis": {
+              "type": "object",
+              "properties": {
+                "maxDepth": { "type": "number", "default": 10 },
+                "includeTests": { "type": "boolean", "default": false },
+                "includeComments": { "type": "boolean", "default": false },
+                "callGraphEnabled": { "type": "boolean", "default": true }
+              }
+            },
+            "git": {
+              "type": "object",
+              "properties": {
+                "repositories": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "path": { "type": "string" },
+                      "remote": { "type": "string" },
+                      "branch": { "type": "string", "default": "main" }
+                    },
+                    "required": ["id", "name", "path", "remote"]
+                  }
+                },
+                "autoSync": { "type": "boolean", "default": true },
+                "syncInterval": { "type": "number", "default": 1800000 }
+              }
+            }
+          }
+        },
+        "rlmNavigator": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "default": "RLMNavigatorBridge" },
+            "version": { "type": "string", "default": "1.0.0" },
+            "enabled": { "type": "boolean", "default": true },
+            "timeout": { "type": "number", "default": 30000 },
+            "retryAttempts": { "type": "number", "default": 3 },
+            "circuitBreakerThreshold": { "type": "number", "default": 5 },
+            "healthCheckInterval": { "type": "number", "default": 60000 },
+            "navigator": {
+              "type": "object",
+              "properties": {
+                "mcpEndpoint": { "type": "string" },
+                "protocol": { "enum": ["stdio", "websocket", "http"], "default": "stdio" },
+                "maxConcurrentNavigations": { "type": "number", "default": 5 },
+                "cacheEnabled": { "type": "boolean", "default": true },
+                "cacheTTL": { "type": "number", "default": 300000 }
+              },
+              "required": ["mcpEndpoint"]
+            },
+            "ast": {
+              "type": "object",
+              "properties": {
+                "supportedLanguages": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "default": ["typescript", "javascript", "python", "java", "go", "rust", "cpp", "c"]
+                },
+                "parseTimeout": { "type": "number", "default": 30000 },
+                "maxFileSize": { "type": "number", "default": 10485760 },
+                "includeComments": { "type": "boolean", "default": false },
+                "includeWhitespace": { "type": "boolean", "default": false }
+              }
+            },
+            "analysis": {
+              "type": "object",
+              "properties": {
+                "semanticAnalysis": { "type": "boolean", "default": true },
+                "typeInference": { "type": "boolean", "default": true },
+                "controlFlowAnalysis": { "type": "boolean", "default": true },
+                "dataFlowAnalysis": { "type": "boolean", "default": false }
+              }
+            },
+            "indexing": {
+              "type": "object",
+              "properties": {
+                "incrementalUpdates": { "type": "boolean", "default": true },
+                "watchFileChanges": { "type": "boolean", "default": true },
+                "debounceDelay": { "type": "number", "default": 500 }
+              }
+            }
+          },
+          "required": ["navigator"]
+        },
+        "claudeCode": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "default": "ClaudeCodeBridge" },
+            "version": { "type": "string", "default": "1.0.0" },
+            "enabled": { "type": "boolean", "default": true },
+            "timeout": { "type": "number", "default": 30000 },
+            "retryAttempts": { "type": "number", "default": 3 },
+            "circuitBreakerThreshold": { "type": "number", "default": 5 },
+            "healthCheckInterval": { "type": "number", "default": 60000 },
+            "execution": {
+              "type": "object",
+              "properties": {
+                "apiEndpoint": { "type": "string" },
+                "apiKey": { "type": "string" },
+                "maxConcurrentExecutions": { "type": "number", "default": 10 },
+                "executionTimeout": { "type": "number", "default": 300000 },
+                "sandboxMode": { "type": "boolean", "default": true }
+              },
+              "required": ["apiEndpoint", "apiKey"]
+            },
+            "agents": {
+              "type": "object",
+              "properties": {
+                "coordinatorEndpoint": { "type": "string" },
+                "maxActiveAgents": { "type": "number", "default": 15 },
+                "agentPoolSize": { "type": "number", "default": 20 },
+                "heartbeatInterval": { "type": "number", "default": 30000 }
+              }
+            },
+            "tools": {
+              "type": "object",
+              "properties": {
+                "availableTools": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "default": ["bash", "read", "write", "edit", "glob", "grep"]
+                },
+                "customToolRegistry": { "type": "string", "default": "default" },
+                "toolExecutionTimeout": { "type": "number", "default": 60000 },
+                "toolRateLimits": {
+                  "type": "object",
+                  "additionalProperties": { "type": "number" },
+                  "default": {
+                    "bash": 100,
+                    "read": 200,
+                    "write": 50,
+                    "edit": 100
+                  }
+                }
+              }
+            },
+            "coordination": {
+              "type": "object",
+              "properties": {
+                "workflow": { "enum": ["sequential", "parallel", "hybrid"], "default": "hybrid" },
+                "failureStrategy": { "enum": ["abort", "continue", "retry"], "default": "retry" },
+                "resultAggregation": { "enum": ["merge", "append", "custom"], "default": "merge" }
+              }
+            }
+          },
+          "required": ["execution"]
+        }
+      }
+    },
+    "global": {
+      "type": "object",
+      "properties": {
+        "logging": {
+          "type": "object",
+          "properties": {
+            "level": { "enum": ["debug", "info", "warn", "error"], "default": "info" },
+            "format": { "enum": ["json", "text"], "default": "json" },
+            "enableFileLogging": { "type": "boolean", "default": true },
+            "logDirectory": { "type": "string", "default": "./logs" }
+          }
+        },
+        "monitoring": {
+          "type": "object",
+          "properties": {
+            "enableMetrics": { "type": "boolean", "default": true },
+            "metricsPort": { "type": "number", "default": 9090 },
+            "enableTracing": { "type": "boolean", "default": false },
+            "tracingEndpoint": { "type": "string" }
+          }
+        },
+        "security": {
+          "type": "object",
+          "properties": {
+            "enableAuthentication": { "type": "boolean", "default": true },
+            "enableAuthorization": { "type": "boolean", "default": true },
+            "enableEncryption": { "type": "boolean", "default": true },
+            "secretsManager": { "type": "string", "default": "local" }
+          }
+        },
+        "performance": {
+          "type": "object",
+          "properties": {
+            "enableCaching": { "type": "boolean", "default": true },
+            "cacheSize": { "type": "number", "default": 104857600 },
+            "enableCompression": { "type": "boolean", "default": true },
+            "maxConcurrency": { "type": "number", "default": 100 }
+          }
+        }
+      }
+    }
+  },
+  "required": ["bridges"]
+}

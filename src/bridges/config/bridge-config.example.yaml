@@ -1,0 +1,331 @@
+# Bridge Configuration Example
+# This file provides example configurations for all integration bridges
+
+bridges:
+  dossier:
+    name: "DossierBridge"
+    version: "1.0.0"
+    enabled: true
+    timeout: 30000
+    retryAttempts: 3
+    circuitBreakerThreshold: 5
+    healthCheckInterval: 60000
+
+    dossierApi:
+      baseUrl: "https://api.dossier.example.com"
+      apiKey: "${DOSSIER_API_KEY}"
+      version: "v1"
+
+    ui:
+      webSocketUrl: "wss://dossier.example.com/ws"
+      theme: "auto"
+      refreshInterval: 5000
+
+    orchestration:
+      maxConcurrentTasks: 10
+      taskTimeout: 300000
+      priorityLevels: ["low", "medium", "high", "critical"]
+
+  ruflo:
+    name: "RufloBridge"
+    version: "1.0.0"
+    enabled: true
+    timeout: 30000
+    retryAttempts: 3
+    circuitBreakerThreshold: 5
+    healthCheckInterval: 60000
+
+    rufloApi:
+      baseUrl: "https://api.ruflo.example.com"
+      apiKey: "${RUFLO_API_KEY}"
+      version: "v3"
+
+    swarm:
+      topology: "hierarchical"
+      maxAgents: 15
+      strategy: "specialized"
+      consensus: "raft"
+
+    memory:
+      type: "hybrid"
+      hnswEnabled: true
+      vectorDimensions: 768
+      maxMemorySize: 1073741824  # 1GB
+
+    neural:
+      enabled: true
+      modelRouting: true
+      tierStrategy: "3-tier"
+
+  adwSkills:
+    name: "ADWSkillsBridge"
+    version: "1.0.0"
+    enabled: true
+    timeout: 30000
+    retryAttempts: 3
+    circuitBreakerThreshold: 5
+    healthCheckInterval: 60000
+
+    methodology:
+      version: "2.0"
+      strictMode: false
+      evidenceThreshold: 0.7
+      hypothesisLifetime: 604800000  # 1 week
+
+    investigation:
+      maxParallelInvestigations: 5
+      defaultTimeout: 3600000  # 1 hour
+      evidenceStorage: "local"
+
+    skills:
+      enabledSkills:
+        - "observe_system_behavior"
+        - "analyze_logs"
+        - "trace_execution"
+        - "performance_analysis"
+        - "security_scan"
+      skillRegistry: "default"
+      autoDiscovery: true
+
+    workflow:
+      templates:
+        - "basic_investigation"
+        - "security_analysis"
+        - "performance_debugging"
+        - "incident_response"
+      customSteps: true
+      approvalRequired: false
+
+  gitNexus:
+    name: "GitNexusBridge"
+    version: "1.0.0"
+    enabled: true
+    timeout: 30000
+    retryAttempts: 3
+    circuitBreakerThreshold: 5
+    healthCheckInterval: 60000
+
+    database:
+      kuzuPath: "./data/kuzu"
+      connectionPool: 5
+      queryTimeout: 30000
+      maxMemory: "2GB"
+
+    indexing:
+      autoIndexing: true
+      indexInterval: 3600000  # 1 hour
+      parallelWorkers: 4
+      supportedLanguages:
+        - "typescript"
+        - "javascript"
+        - "python"
+        - "java"
+        - "go"
+        - "rust"
+        - "cpp"
+        - "c"
+
+    analysis:
+      maxDepth: 10
+      includeTests: false
+      includeComments: false
+      callGraphEnabled: true
+
+    git:
+      repositories:
+        - id: "contexto"
+          name: "Contexto Project"
+          path: "/workspace/contexto"
+          remote: "https://github.com/example/contexto.git"
+          branch: "main"
+        - id: "shared-lib"
+          name: "Shared Library"
+          path: "/workspace/shared-lib"
+          remote: "https://github.com/example/shared-lib.git"
+          branch: "main"
+      autoSync: true
+      syncInterval: 1800000  # 30 minutes
+
+  rlmNavigator:
+    name: "RLMNavigatorBridge"
+    version: "1.0.0"
+    enabled: true
+    timeout: 30000
+    retryAttempts: 3
+    circuitBreakerThreshold: 5
+    healthCheckInterval: 60000
+
+    navigator:
+      mcpEndpoint: "stdio://rlm-navigator"
+      protocol: "stdio"
+      maxConcurrentNavigations: 5
+      cacheEnabled: true
+      cacheTTL: 300000  # 5 minutes
+
+    ast:
+      supportedLanguages:
+        - "typescript"
+        - "javascript"
+        - "python"
+        - "java"
+        - "go"
+        - "rust"
+        - "cpp"
+        - "c"
+      parseTimeout: 30000
+      maxFileSize: 10485760  # 10MB
+      includeComments: false
+      includeWhitespace: false
+
+    analysis:
+      semanticAnalysis: true
+      typeInference: true
+      controlFlowAnalysis: true
+      dataFlowAnalysis: false
+
+    indexing:
+      incrementalUpdates: true
+      watchFileChanges: true
+      debounceDelay: 500
+
+  claudeCode:
+    name: "ClaudeCodeBridge"
+    version: "1.0.0"
+    enabled: true
+    timeout: 30000
+    retryAttempts: 3
+    circuitBreakerThreshold: 5
+    healthCheckInterval: 60000
+
+    execution:
+      apiEndpoint: "https://api.claude-code.example.com"
+      apiKey: "${CLAUDE_CODE_API_KEY}"
+      maxConcurrentExecutions: 10
+      executionTimeout: 300000  # 5 minutes
+      sandboxMode: true
+
+    agents:
+      coordinatorEndpoint: "https://coordinator.claude-code.example.com"
+      maxActiveAgents: 15
+      agentPoolSize: 20
+      heartbeatInterval: 30000
+
+    tools:
+      availableTools:
+        - "bash"
+        - "read"
+        - "write"
+        - "edit"
+        - "glob"
+        - "grep"
+        - "git"
+        - "npm"
+        - "python"
+      customToolRegistry: "default"
+      toolExecutionTimeout: 60000
+      toolRateLimits:
+        bash: 100
+        read: 200
+        write: 50
+        edit: 100
+        git: 50
+
+    coordination:
+      workflow: "hybrid"
+      failureStrategy: "retry"
+      resultAggregation: "merge"
+
+# Global configuration
+global:
+  logging:
+    level: "info"
+    format: "json"
+    enableFileLogging: true
+    logDirectory: "./logs"
+
+  monitoring:
+    enableMetrics: true
+    metricsPort: 9090
+    enableTracing: false
+    tracingEndpoint: "http://jaeger:14268/api/traces"
+
+  security:
+    enableAuthentication: true
+    enableAuthorization: true
+    enableEncryption: true
+    secretsManager: "local"
+
+  performance:
+    enableCaching: true
+    cacheSize: 104857600  # 100MB
+    enableCompression: true
+    maxConcurrency: 100
+
+# Environment-specific overrides
+environments:
+  development:
+    bridges:
+      dossier:
+        dossierApi:
+          baseUrl: "http://localhost:3001"
+        ui:
+          webSocketUrl: "ws://localhost:3001/ws"
+      ruflo:
+        rufloApi:
+          baseUrl: "http://localhost:3002"
+      claudeCode:
+        execution:
+          apiEndpoint: "http://localhost:3003"
+        agents:
+          coordinatorEndpoint: "http://localhost:3004"
+    global:
+      logging:
+        level: "debug"
+      security:
+        enableAuthentication: false
+        enableAuthorization: false
+        enableEncryption: false
+
+  testing:
+    bridges:
+      dossier:
+        enabled: false
+      ruflo:
+        enabled: false
+      gitNexus:
+        indexing:
+          autoIndexing: false
+      rlmNavigator:
+        navigator:
+          cacheEnabled: false
+      claudeCode:
+        execution:
+          sandboxMode: true
+          executionTimeout: 10000
+    global:
+      logging:
+        level: "warn"
+
+  production:
+    bridges:
+      dossier:
+        retryAttempts: 5
+        circuitBreakerThreshold: 3
+      ruflo:
+        swarm:
+          maxAgents: 25
+      gitNexus:
+        indexing:
+          parallelWorkers: 8
+      claudeCode:
+        execution:
+          maxConcurrentExecutions: 25
+        agents:
+          maxActiveAgents: 50
+    global:
+      logging:
+        level: "warn"
+      monitoring:
+        enableTracing: true
+      performance:
+        maxConcurrency: 200

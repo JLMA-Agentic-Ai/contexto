@@ -1,0 +1,126 @@
+# Visión Maestra: Plataforma de Desarrollo Autónomo
+# 6-Component Integration Configuration
+
+platform:
+  name: "vision-maestra"
+  version: "1.0.0"
+
+  # Component Integration Map
+  components:
+    dossier:
+      type: "frontend"
+      protocol: "http"
+      port: 3000
+      endpoints:
+        api: "/api/platform"
+        webhooks: "/api/webhooks"
+        streaming: "/api/stream"
+
+    ruflo:
+      type: "orchestrator"
+      protocol: "mcp"
+      capabilities:
+        - "task-management"
+        - "swarm-coordination"
+        - "agent-deployment"
+        - "real-time-streaming"
+
+    adw-skills:
+      type: "methodology"
+      integration: "skill-system"
+      capabilities:
+        - "evidence-investigation"
+        - "quality-gates"
+        - "adversarial-validation"
+
+    gitnexus:
+      type: "analysis"
+      location: "base_projects/GitNexus/"
+      capabilities:
+        - "code-graph-analysis"
+        - "kuzu-database"
+        - "graph-visualization"
+
+    rlm-navigator:
+      type: "navigation"
+      protocol: "mcp"
+      capabilities:
+        - "ast-navigation"
+        - "codebase-exploration"
+        - "recursive-analysis"
+
+    claude-code:
+      type: "execution"
+      integration: "native"
+      capabilities:
+        - "agent-spawning"
+        - "task-execution"
+        - "tool-coordination"
+
+# Workflow Orchestration
+orchestration:
+  topology: "hierarchical-mesh"
+  maxAgents: 15
+  strategy: "specialized"
+
+  workflows:
+    card-execution:
+      phases:
+        - investigation    # ADW Skills + RLM Navigator
+        - analysis        # GitNexus + ruflo coordination
+        - implementation  # Claude Code + ruflo swarm
+        - validation      # ADW Skills quality gates
+        - visualization   # Dossier + GitNexus integration
+
+    real-time-streaming:
+      protocols:
+        - websocket
+        - server-sent-events
+        - webhook-notification
+
+      event-types:
+        - task-progress
+        - agent-coordination
+        - workflow-status
+        - validation-results
+
+# Integration Bridges
+bridges:
+  dossier-ruflo:
+    protocol: "rest-api"
+    streaming: true
+    authentication: "internal"
+
+  ruflo-gitnexus:
+    protocol: "file-system"
+    coordination: true
+    memory-sharing: true
+
+  adw-rlm:
+    protocol: "mcp"
+    investigation-depth: "dig"
+    evidence-tracking: true
+
+# Evidence & Quality Management
+evidence:
+  confidence-thresholds:
+    solid: 0.80
+    soft: 0.60
+    shaky: 0.30
+
+  auto-investigation:
+    decision-points: true
+    architecture-choices: true
+    security-decisions: true
+
+# Performance & Monitoring
+performance:
+  targets:
+    task-creation: "<500ms"
+    streaming-latency: "<100ms"
+    agent-coordination: "<2s"
+
+  monitoring:
+    health-checks: true
+    metrics-collection: true
+    real-time-dashboards: true
