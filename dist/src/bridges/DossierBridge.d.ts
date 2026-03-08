@@ -76,7 +76,7 @@ export interface OrchestrationEvent extends BridgeEvent {
     };
 }
 export declare class DossierBridge extends BaseBridge {
-    private config;
+    protected config: DossierConfig;
     private webSocket?;
     private uiStates;
     private activeTasks;

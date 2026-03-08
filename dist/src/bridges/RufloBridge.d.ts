@@ -113,7 +113,7 @@ export interface TaskExecutionEvent extends BridgeEvent {
     };
 }
 export declare class RufloBridge extends BaseBridge {
-    private config;
+    protected config: RufloConfig;
     private activeSwarms;
     private agents;
     private tasks;

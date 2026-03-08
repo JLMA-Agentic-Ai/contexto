@@ -206,7 +206,7 @@ export interface NavigationEvent extends BridgeEvent {
     };
 }
 export declare class RLMNavigatorBridge extends BaseBridge {
-    private config;
+    protected config: RLMNavigatorConfig;
     private activeSessions;
     private astCache;
     private analysisCache;

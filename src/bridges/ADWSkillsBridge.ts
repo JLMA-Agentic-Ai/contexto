@@ -179,7 +179,7 @@ export interface InvestigationEvent extends BridgeEvent {
 }
 
 export class ADWSkillsBridge extends BaseBridge {
-  private config: ADWConfig;
+  protected config: ADWConfig;
   private activeInvestigations: Map<string, ADWInvestigation> = new Map();
   private skillRegistry: Map<string, ADWSkill> = new Map();
   private workflowTemplates: Map<string, ADWWorkflowTemplate> = new Map();

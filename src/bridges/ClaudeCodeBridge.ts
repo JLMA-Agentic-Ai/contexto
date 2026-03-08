@@ -274,7 +274,7 @@ export interface ClaudeCodeEvent extends BridgeEvent {
 }
 
 export class ClaudeCodeBridge extends BaseBridge {
-  private config: ClaudeCodeConfig;
+  protected config: ClaudeCodeConfig;
   private activeExecutions: Map<string, CodeExecution> = new Map();
   private activeAgents: Map<string, Agent> = new Map();
   private coordinations: Map<string, TaskCoordination> = new Map();

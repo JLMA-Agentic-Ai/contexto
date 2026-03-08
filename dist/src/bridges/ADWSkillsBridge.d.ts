@@ -159,7 +159,7 @@ export interface InvestigationEvent extends BridgeEvent {
     };
 }
 export declare class ADWSkillsBridge extends BaseBridge {
-    private config;
+    protected config: ADWConfig;
     private activeInvestigations;
     private skillRegistry;
     private workflowTemplates;

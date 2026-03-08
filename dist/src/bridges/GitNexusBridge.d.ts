@@ -147,7 +147,7 @@ export interface IndexingEvent extends BridgeEvent {
     };
 }
 export declare class GitNexusBridge extends BaseBridge {
-    private config;
+    protected config: GitNexusConfig;
     private repositories;
     private indexingProgress;
     private queryCache;

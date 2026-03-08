@@ -97,7 +97,7 @@ export const enterpriseSecurityPolicy: SecurityPolicy = {
     },
     monitoring: {
       logLevel: 'warn', // Enterprise logging
-      alertWebhook: process.env.SECURITY_WEBHOOK_URL
+      alertWebhook: process.env.SECURITY_WEBHOOK_URL || undefined
     }
   }
 };

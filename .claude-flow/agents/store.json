@@ -372,6 +372,58 @@
       "createdAt": "2026-03-08T01:58:51.825Z",
       "model": "sonnet",
       "modelRoutedBy": "default"
+    },
+    "ts-validator-primary": {
+      "agentId": "ts-validator-primary",
+      "agentType": "ts-build-validator",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "priority": "critical",
+        "specialization": "typescript-errors",
+        "evidenceThreshold": 0.8,
+        "noStopCycle": true,
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T02:03:39.246Z",
+      "domain": "typescript-compilation",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "security-validator": {
+      "agentId": "security-validator",
+      "agentType": "security-auditor",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "priority": "high",
+        "specialization": "security-types",
+        "evidenceThreshold": 0.75,
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T02:03:41.195Z",
+      "domain": "security-compliance",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "bridge-validator": {
+      "agentId": "bridge-validator",
+      "agentType": "bridge-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "priority": "high",
+        "specialization": "bridge-patterns",
+        "evidenceThreshold": 0.75,
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T02:03:42.597Z",
+      "domain": "bridge-architecture",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
     }
   },
   "version": "3.0.0"

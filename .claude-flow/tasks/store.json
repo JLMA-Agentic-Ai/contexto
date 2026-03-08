@@ -460,6 +460,66 @@
       "createdAt": "2026-03-08T01:51:36.773Z",
       "startedAt": null,
       "completedAt": null
+    },
+    "task-1772935440585-74vyqk": {
+      "taskId": "task-1772935440585-74vyqk",
+      "type": "bugfix",
+      "description": "Fix exactOptionalPropertyTypes compatibility in security-config.ts - alertWebhook property type mismatch",
+      "priority": "critical",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "security-validator"
+      ],
+      "tags": [
+        "gate-1",
+        "typescript",
+        "security-config",
+        "exactOptionalPropertyTypes"
+      ],
+      "createdAt": "2026-03-08T02:04:00.585Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772935443408-70r9fw": {
+      "taskId": "task-1772935443408-70r9fw",
+      "type": "bugfix",
+      "description": "Fix bridge inheritance issues - config property visibility in all Bridge classes (ADWSkillsBridge, ClaudeCodeBridge, DossierBridge, GitNexusBridge, RLMNavigatorBridge, RufloBridge)",
+      "priority": "critical",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "bridge-validator"
+      ],
+      "tags": [
+        "gate-1",
+        "typescript",
+        "bridge-inheritance",
+        "access-modifiers"
+      ],
+      "createdAt": "2026-03-08T02:04:03.408Z",
+      "startedAt": null,
+      "completedAt": null
+    },
+    "task-1772935445369-e7x4rn": {
+      "taskId": "task-1772935445369-e7x4rn",
+      "type": "bugfix",
+      "description": "Fix ClaudeCodeBridge specific issues - unknown type assertions, invalid event types, undefined property access",
+      "priority": "critical",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [
+        "ts-validator-primary"
+      ],
+      "tags": [
+        "gate-1",
+        "typescript",
+        "claude-code-bridge",
+        "type-safety"
+      ],
+      "createdAt": "2026-03-08T02:04:05.369Z",
+      "startedAt": null,
+      "completedAt": null
     }
   },
   "version": "3.0.0"
