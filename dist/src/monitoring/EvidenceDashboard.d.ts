@@ -3,7 +3,7 @@
  * Real-time evidence tracking and quality monitoring for ADW methodology
  */
 import { EventEmitter } from 'events';
-import { EvidenceTracker } from '../orchestration/WorkflowOrchestrator.js';
+import { EvidenceTracker } from '../orchestration/WorkflowOrchestrator';
 import { GateExecution, QualityGateType } from '../validation/ADWQualityGates.js';
 export interface EvidenceMetrics {
     totalDecisions: number;

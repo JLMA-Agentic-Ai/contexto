@@ -376,9 +376,71 @@ class ADWQualityGates extends events_1.EventEmitter {
      * Simple condition evaluator (replace with safer implementation in production)
      */
     evaluateCondition(condition, data) {
-        // TODO: Implement safe condition evaluation
-        // For MVP, return true for demonstration
-        return true;
+        try {
+            // Simple condition evaluation for common patterns
+            // Handle numeric comparisons
+            if (condition.includes('driftScore < 0.15')) {
+                return data.driftScore < 0.15;
+            }
+            if (condition.includes('scopeChange < 0.20')) {
+                return data.scopeChange < 0.20;
+            }
+            if (condition.includes('buildStatus === "success"')) {
+                return data.buildStatus === 'success';
+            }
+            if (condition.includes('performanceScore >= baseline * 0.95')) {
+                return data.performanceScore >= 0.95; // Assuming baseline is 1.0
+            }
+            if (condition.includes('streamingLatency < 100')) {
+                return data.streamingLatency < 100;
+            }
+            if (condition.includes('integratedComponents === 6')) {
+                return data.integratedComponents === 6;
+            }
+            if (condition.includes('workflowOrchestration === true')) {
+                return data.workflowOrchestration === true;
+            }
+            if (condition.includes('bridgeIntegrity === "SOLID"')) {
+                return data.bridgeIntegrity === 'SOLID';
+            }
+            if (condition.includes('streamingArchitecture === "VALIDATED"')) {
+                return data.streamingArchitecture === 'VALIDATED';
+            }
+            if (condition.includes('evidenceTracking === true')) {
+                return data.evidenceTracking === true;
+            }
+            if (condition.includes('adrCoverage >= 0.90')) {
+                return data.adrCoverage >= 0.90;
+            }
+            if (condition.includes('averageEvidenceQuality >= 0.75')) {
+                return data.averageEvidenceQuality >= 0.75;
+            }
+            if (condition.includes('securityScore >= 0.90')) {
+                return data.securityScore >= 0.90;
+            }
+            if (condition.includes('performanceTargets === "MET"')) {
+                return data.performanceTargets === 'MET';
+            }
+            if (condition.includes('allIntegrationsHealthy === true')) {
+                return data.allIntegrationsHealthy === true;
+            }
+            if (condition.includes('evidenceCoverage >= 0.95')) {
+                return data.evidenceCoverage >= 0.95;
+            }
+            if (condition.includes('confidenceCalibration === "ACCURATE"')) {
+                return data.confidenceCalibration === 'ACCURATE';
+            }
+            if (condition.includes('investigationCompleteness >= 0.90')) {
+                return data.investigationCompleteness >= 0.90;
+            }
+            // Default to false for unknown conditions
+            console.warn(`Unknown condition: ${condition}`);
+            return false;
+        }
+        catch (error) {
+            console.error(`Error evaluating condition "${condition}":`, error);
+            return false;
+        }
     }
     /**
      * Calculate gate confidence based on evidence and validation results

@@ -1,0 +1,82 @@
+{
+  "agents": {
+    "gate-validator-1772960476332-d8xt": {
+      "agentId": "gate-validator-1772960476332-d8xt",
+      "agentType": "validation-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "specialist",
+        "hiveRole": "specialist"
+      },
+      "createdAt": "2026-03-08T09:01:16.332Z",
+      "domain": "hive-mind"
+    },
+    "gate-validator-1772960476332-g5ss": {
+      "agentId": "gate-validator-1772960476332-g5ss",
+      "agentType": "validation-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "specialist",
+        "hiveRole": "specialist"
+      },
+      "createdAt": "2026-03-08T09:01:16.332Z",
+      "domain": "hive-mind"
+    },
+    "gate-validator-1772960476332-n2n7": {
+      "agentId": "gate-validator-1772960476332-n2n7",
+      "agentType": "validation-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "specialist",
+        "hiveRole": "specialist"
+      },
+      "createdAt": "2026-03-08T09:01:16.332Z",
+      "domain": "hive-mind"
+    },
+    "gate-validator-1772960476332-at6a": {
+      "agentId": "gate-validator-1772960476332-at6a",
+      "agentType": "validation-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "specialist",
+        "hiveRole": "specialist"
+      },
+      "createdAt": "2026-03-08T09:01:16.332Z",
+      "domain": "hive-mind"
+    },
+    "gate-validator-1772960476332-wn61": {
+      "agentId": "gate-validator-1772960476332-wn61",
+      "agentType": "validation-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "specialist",
+        "hiveRole": "specialist"
+      },
+      "createdAt": "2026-03-08T09:01:16.332Z",
+      "domain": "hive-mind"
+    },
+    "gate-validator-1772960476332-9hxx": {
+      "agentId": "gate-validator-1772960476332-9hxx",
+      "agentType": "validation-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "specialist",
+        "hiveRole": "specialist"
+      },
+      "createdAt": "2026-03-08T09:01:16.332Z",
+      "domain": "hive-mind"
+    }
+  }
+}

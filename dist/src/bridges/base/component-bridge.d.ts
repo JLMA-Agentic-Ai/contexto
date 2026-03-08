@@ -36,6 +36,12 @@ export interface MessageMetadata {
     priority: 'low' | 'normal' | 'high' | 'critical';
     correlationId?: string;
     timeout?: number;
+    securityContext?: {
+        sessionId: string;
+        userId: string;
+        signature: string;
+        timestamp: Date;
+    };
 }
 export interface ComponentConfig {
     id: string;

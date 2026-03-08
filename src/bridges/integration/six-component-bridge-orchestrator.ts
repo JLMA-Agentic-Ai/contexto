@@ -13,7 +13,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { ComponentBridge, ComponentMessage, HealthMetrics } from '../base/component-bridge';
+import { ComponentBridge, ComponentMessage, HealthMetrics, ComponentCapability } from '../base/component-bridge';
 import { SecurityBridgeManager } from '../security/security-bridge-manager';
 import { RealTimeCoordinator, StreamMessage } from '../../streaming/real-time-coordinator';
 import { ADWEvidenceTracker, Evidence, EvidenceLevel } from '../../evidence/adw-evidence-tracker';
@@ -703,7 +703,7 @@ export class SixComponentBridgeOrchestrator extends EventEmitter {
       activeWorkflows: workflows,
       bridgeMetrics: Array.from(this.bridgeMetrics.values()),
       componentHealth,
-      overallStatus: healthSnapshot.overallHealth,
+      overallStatus: healthSnapshot.overallHealth === 'unknown' ? 'unhealthy' : healthSnapshot.overallHealth as 'healthy' | 'degraded' | 'unhealthy',
       evidence: evidenceStats
     };
   }
@@ -855,7 +855,42 @@ export class SixComponentBridgeOrchestrator extends EventEmitter {
     // Create bridge implementation based on protocol
     // This is a simplified implementation - real bridges would have full protocol handling
 
-    const bridge = new ComponentBridge({
+    // Create concrete bridge implementation
+    const bridge = new (class extends ComponentBridge {
+      async initialize(): Promise<void> {
+        this.isInitialized = true;
+      }
+
+      async shutdown(): Promise<void> {
+        this.isInitialized = false;
+      }
+
+      async checkHealth(): Promise<HealthMetrics> {
+        return {
+          uptime: Date.now() - (this.lastHealthCheck?.getTime() || Date.now()),
+          responseTime: 100,
+          errorRate: 0,
+          memoryUsage: 0,
+          cpuUsage: 0
+        };
+      }
+
+      async sendMessage(message: ComponentMessage): Promise<any> {
+        return { success: true, messageId: message.id };
+      }
+
+      getCapabilities(): ComponentCapability[] {
+        return [];
+      }
+
+      subscribe(eventType: string, callback: (event: any) => void): void {
+        // Simple event subscription implementation
+      }
+
+      unsubscribe(eventType: string, callback?: (event: any) => void): void {
+        // Simple event unsubscription implementation
+      }
+    })({
       id: bridgeId,
       name: bridgeDef.name,
       version: '1.0.0',

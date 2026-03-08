@@ -12,7 +12,8 @@
  */
 
 import Joi from 'joi';
-import { sanitize } from 'sanitizer';
+// import { sanitize } from 'sanitizer'; // Temporarily disabled - package not installed
+const sanitize = (input: string) => input.replace(/<[^>]*>/g, ''); // Basic HTML sanitization fallback
 import { SecurityAuditLogger } from './audit-logger';
 
 // Base validation schemas

@@ -291,7 +291,7 @@ class SecurityAuditLogger extends events_1.EventEmitter {
         const cipher = (0, crypto_1.createCipheriv)(this.config.encryption.algorithm, this.encryptionKey, iv);
         let encrypted = cipher.update(entry, 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        const tag = cipher.getAuthTag();
+        const tag = cipher.getAuthTag(); // Cast for GCM mode support
         return JSON.stringify({
             encrypted,
             iv: iv.toString('hex'),

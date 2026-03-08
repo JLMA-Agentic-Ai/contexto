@@ -4,8 +4,48 @@
  * Coordinates all 6 platform components using ruflo V3 + ADW methodology
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VisualMaestraOrchestrator = void 0;
+exports.VisualMaestraOrchestrator = exports.EvidenceConfidence = exports.EvidenceTrackerImpl = void 0;
 const events_1 = require("events");
+/**
+ * Evidence Tracker Implementation
+ */
+class EvidenceTrackerImpl {
+    decisions = [];
+    investigations = [];
+    confidenceScore = 0;
+    constructor() { }
+    addDecision(decision, evidence) {
+        this.decisions.push(evidence);
+        this.recalculateConfidenceScore();
+    }
+    addInvestigation(investigation) {
+        this.investigations.push(investigation);
+    }
+    recalculateConfidenceScore() {
+        if (this.decisions.length === 0) {
+            this.confidenceScore = 0;
+            return;
+        }
+        const totalConfidence = this.decisions.reduce((sum, decision) => {
+            return sum + decision.confidence;
+        }, 0);
+        this.confidenceScore = totalConfidence / this.decisions.length;
+    }
+    getHighConfidenceDecisions() {
+        return this.decisions.filter(d => d.confidence >= EvidenceConfidence.SOFT);
+    }
+    getDecisionsRequiringInvestigation() {
+        return this.decisions.filter(d => d.investigationRequired);
+    }
+}
+exports.EvidenceTrackerImpl = EvidenceTrackerImpl;
+var EvidenceConfidence;
+(function (EvidenceConfidence) {
+    EvidenceConfidence[EvidenceConfidence["SOLID"] = 0.85] = "SOLID";
+    EvidenceConfidence[EvidenceConfidence["SOFT"] = 0.65] = "SOFT";
+    EvidenceConfidence[EvidenceConfidence["SHAKY"] = 0.35] = "SHAKY";
+    EvidenceConfidence[EvidenceConfidence["UNKNOWN"] = 0.15] = "UNKNOWN"; // Very low confidence evidence
+})(EvidenceConfidence || (exports.EvidenceConfidence = EvidenceConfidence = {}));
 // Main Workflow Orchestrator
 class VisualMaestraOrchestrator extends events_1.EventEmitter {
     config;

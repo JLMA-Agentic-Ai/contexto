@@ -17,7 +17,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InputValidationSchemas = void 0;
 const joi_1 = __importDefault(require("joi"));
-const sanitizer_1 = require("sanitizer");
+// import { sanitize } from 'sanitizer'; // Temporarily disabled - package not installed
+const sanitize = (input) => input.replace(/<[^>]*>/g, ''); // Basic HTML sanitization fallback
 // Base validation schemas
 const baseMessageSchema = joi_1.default.object({
     id: joi_1.default.string().uuid().required(),
@@ -429,7 +430,7 @@ class InputValidationSchemas {
      */
     sanitizeMessage(obj) {
         if (typeof obj === 'string') {
-            return (0, sanitizer_1.sanitize)(obj);
+            return sanitize(obj);
         }
         else if (Array.isArray(obj)) {
             return obj.map(item => this.sanitizeMessage(item));

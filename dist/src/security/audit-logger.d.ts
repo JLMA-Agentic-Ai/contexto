@@ -53,7 +53,7 @@ export interface ValidationEvent {
     timestamp: Date;
 }
 export interface SecurityEvent {
-    type: 'threat_detected' | 'ip_blacklisted' | 'ip_unblacklisted' | 'circuit_state_changed' | 'rate_limit_exceeded' | 'suspicious_pattern_detected' | 'cascade_failure_prevented' | 'circuit_state_forced' | 'mfa_failure' | 'mfa_success' | 'ip_mismatch_refresh';
+    type: 'threat_detected' | 'ip_blacklisted' | 'ip_unblacklisted' | 'circuit_state_changed' | 'rate_limit_exceeded' | 'suspicious_pattern_detected' | 'cascade_failure_prevented' | 'circuit_state_forced' | 'mfa_failure' | 'mfa_success' | 'ip_mismatch_refresh' | 'authentication_failure';
     componentId?: string;
     ipAddress?: string;
     userId?: string;
@@ -64,6 +64,11 @@ export interface SecurityEvent {
     reason?: string;
     error?: string;
     code?: string;
+    originalIp?: string;
+    requestIp?: string;
+    requestCount?: number;
+    indicators?: any;
+    recentFailures?: any;
     timestamp: Date;
 }
 export interface OperationEvent {

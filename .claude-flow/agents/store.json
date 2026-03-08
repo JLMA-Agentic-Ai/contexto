@@ -424,6 +424,106 @@
       "domain": "bridge-architecture",
       "model": "sonnet",
       "modelRoutedBy": "explicit"
+    },
+    "evidence-hunter-001": {
+      "agentId": "evidence-hunter-001",
+      "agentType": "evidence-hunter",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "specialization": "typescript-error-analysis",
+        "evidence_tracking": true,
+        "truth_score_threshold": 0.95,
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:04:23.946Z",
+      "domain": "type-error-analysis",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "solution-architect-001": {
+      "agentId": "solution-architect-001",
+      "agentType": "solution-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "specialization": "systematic-remediation",
+        "evidence_tracking": true,
+        "rollback_protection": true,
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:04:25.886Z",
+      "domain": "remediation-strategies",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "risk-assessor-001": {
+      "agentId": "risk-assessor-001",
+      "agentType": "risk-assessor",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "specialization": "risk-impact-analysis",
+        "gate_dependency_tracking": true,
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:04:28.391Z",
+      "domain": "impact-analysis",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "alternative-finder-001": {
+      "agentId": "alternative-finder-001",
+      "agentType": "alternative-finder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "specialization": "alternative-solutions",
+        "research_depth": "comprehensive",
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:04:30.587Z",
+      "domain": "alternative-approaches",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "truth-score-analyst-001": {
+      "agentId": "truth-score-analyst-001",
+      "agentType": "truth-score-analyst",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "specialization": "truth-score-monitoring",
+        "auto_rollback": true,
+        "threshold": 0.95,
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:04:32.476Z",
+      "domain": "validation-scoring",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "validation-auditor-001": {
+      "agentId": "validation-auditor-001",
+      "agentType": "validation-auditor",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "specialization": "process-integrity",
+        "gates_preparation": true,
+        "evidence_quality_validation": true,
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:04:34.371Z",
+      "domain": "process-integrity",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
     }
   },
   "version": "3.0.0"

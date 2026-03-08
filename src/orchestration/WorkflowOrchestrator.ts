@@ -51,11 +51,60 @@ export interface EvidenceTracker {
   confidenceScore: number;
 }
 
+/**
+ * Evidence Tracker Implementation
+ */
+export class EvidenceTrackerImpl implements EvidenceTracker {
+  public decisions: EvidenceDecision[] = [];
+  public investigations: Investigation[] = [];
+  public confidenceScore: number = 0;
+
+  constructor() {}
+
+  addDecision(decision: string, evidence: EvidenceDecision): void {
+    this.decisions.push(evidence);
+    this.recalculateConfidenceScore();
+  }
+
+  addInvestigation(investigation: Investigation): void {
+    this.investigations.push(investigation);
+  }
+
+  private recalculateConfidenceScore(): void {
+    if (this.decisions.length === 0) {
+      this.confidenceScore = 0;
+      return;
+    }
+
+    const totalConfidence = this.decisions.reduce((sum, decision) => {
+      return sum + decision.confidence;
+    }, 0);
+
+    this.confidenceScore = totalConfidence / this.decisions.length;
+  }
+
+  getHighConfidenceDecisions(): EvidenceDecision[] {
+    return this.decisions.filter(d => d.confidence >= EvidenceConfidence.SOFT);
+  }
+
+  getDecisionsRequiringInvestigation(): EvidenceDecision[] {
+    return this.decisions.filter(d => d.investigationRequired);
+  }
+}
+
+export enum EvidenceConfidence {
+  SOLID = 0.85,   // High confidence evidence
+  SOFT = 0.65,    // Medium confidence evidence
+  SHAKY = 0.35,   // Low confidence evidence
+  UNKNOWN = 0.15  // Very low confidence evidence
+}
+
 export interface EvidenceDecision {
   decision: string;
-  evidence: 'SOLID' | 'SOFT' | 'SHAKY' | 'UNKNOWN';
-  confidence: number;
-  sources: string[];
+  confidence: EvidenceConfidence;
+  evidence: string[];
+  timestamp: Date;
+  investigationRequired: boolean;
 }
 
 // Main Workflow Orchestrator

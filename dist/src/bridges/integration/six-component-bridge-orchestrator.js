@@ -544,7 +544,7 @@ class SixComponentBridgeOrchestrator extends events_1.EventEmitter {
             activeWorkflows: workflows,
             bridgeMetrics: Array.from(this.bridgeMetrics.values()),
             componentHealth,
-            overallStatus: healthSnapshot.overallHealth,
+            overallStatus: healthSnapshot.overallHealth === 'unknown' ? 'unhealthy' : healthSnapshot.overallHealth,
             evidence: evidenceStats
         };
     }
@@ -687,7 +687,36 @@ class SixComponentBridgeOrchestrator extends events_1.EventEmitter {
     async initializeBridge(bridgeId, bridgeDef) {
         // Create bridge implementation based on protocol
         // This is a simplified implementation - real bridges would have full protocol handling
-        const bridge = new component_bridge_1.ComponentBridge({
+        // Create concrete bridge implementation
+        const bridge = new (class extends component_bridge_1.ComponentBridge {
+            async initialize() {
+                this.isInitialized = true;
+            }
+            async shutdown() {
+                this.isInitialized = false;
+            }
+            async checkHealth() {
+                return {
+                    uptime: Date.now() - (this.lastHealthCheck?.getTime() || Date.now()),
+                    responseTime: 100,
+                    errorRate: 0,
+                    memoryUsage: 0,
+                    cpuUsage: 0
+                };
+            }
+            async sendMessage(message) {
+                return { success: true, messageId: message.id };
+            }
+            getCapabilities() {
+                return [];
+            }
+            subscribe(eventType, callback) {
+                // Simple event subscription implementation
+            }
+            unsubscribe(eventType, callback) {
+                // Simple event unsubscription implementation
+            }
+        })({
             id: bridgeId,
             name: bridgeDef.name,
             version: '1.0.0',

@@ -1,0 +1,24 @@
+{
+  "initialized": true,
+  "topology": "hierarchical",
+  "workers": [
+    "gate-validator-1772960476332-d8xt",
+    "gate-validator-1772960476332-g5ss",
+    "gate-validator-1772960476332-n2n7",
+    "gate-validator-1772960476332-at6a",
+    "gate-validator-1772960476332-wn61",
+    "gate-validator-1772960476332-9hxx"
+  ],
+  "consensus": {
+    "pending": [],
+    "history": []
+  },
+  "sharedMemory": {},
+  "createdAt": "2026-03-08T09:01:15.248Z",
+  "updatedAt": "2026-03-08T09:01:16.333Z",
+  "queen": {
+    "agentId": "adw-validation-queen",
+    "electedAt": "2026-03-08T09:01:15.248Z",
+    "term": 1
+  }
+}

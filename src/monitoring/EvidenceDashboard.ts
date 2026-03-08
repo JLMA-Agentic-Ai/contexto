@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { EvidenceTracker, EvidenceDecision } from '../orchestration/WorkflowOrchestrator.js';
+import { EvidenceTracker, EvidenceDecision, EvidenceConfidence } from '../orchestration/WorkflowOrchestrator';
 import { GateExecution, QualityGateType } from '../validation/ADWQualityGates.js';
 
 // Evidence Dashboard Types
@@ -224,7 +224,7 @@ export class EvidenceDashboard extends EventEmitter {
     const decisions = evidence.decisions;
     if (decisions.length === 0) return 'INSUFFICIENT';
 
-    const solidCount = decisions.filter(d => d.evidence === 'SOLID').length;
+    const solidCount = decisions.filter(d => d.confidence >= EvidenceConfidence.SOLID).length;
     const softCount = decisions.filter(d => d.evidence === 'SOFT').length;
     const shakyCount = decisions.filter(d => d.evidence === 'SHAKY').length;
     const unknownCount = decisions.filter(d => d.evidence === 'UNKNOWN').length;

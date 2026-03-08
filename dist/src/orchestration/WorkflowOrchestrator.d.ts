@@ -42,11 +42,32 @@ export interface EvidenceTracker {
     investigations: Investigation[];
     confidenceScore: number;
 }
+/**
+ * Evidence Tracker Implementation
+ */
+export declare class EvidenceTrackerImpl implements EvidenceTracker {
+    decisions: EvidenceDecision[];
+    investigations: Investigation[];
+    confidenceScore: number;
+    constructor();
+    addDecision(decision: string, evidence: EvidenceDecision): void;
+    addInvestigation(investigation: Investigation): void;
+    private recalculateConfidenceScore;
+    getHighConfidenceDecisions(): EvidenceDecision[];
+    getDecisionsRequiringInvestigation(): EvidenceDecision[];
+}
+export declare enum EvidenceConfidence {
+    SOLID = 0.85,// High confidence evidence
+    SOFT = 0.65,// Medium confidence evidence
+    SHAKY = 0.35,// Low confidence evidence
+    UNKNOWN = 0.15
+}
 export interface EvidenceDecision {
     decision: string;
-    evidence: 'SOLID' | 'SOFT' | 'SHAKY' | 'UNKNOWN';
-    confidence: number;
-    sources: string[];
+    confidence: EvidenceConfidence;
+    evidence: string[];
+    timestamp: Date;
+    investigationRequired: boolean;
 }
 export declare class VisualMaestraOrchestrator extends EventEmitter {
     private config;

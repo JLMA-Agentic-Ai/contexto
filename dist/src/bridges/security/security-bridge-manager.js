@@ -161,7 +161,7 @@ class SecurityBridgeManager extends events_1.EventEmitter {
         const cipher = (0, crypto_1.createCipheriv)(this.policy.encryption.algorithm, this.encryptionKey, iv);
         let encrypted = cipher.update(JSON.stringify(payload), 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        const tag = cipher.getAuthTag();
+        const tag = cipher.getAuthTag(); // Cast for GCM mode support
         return JSON.stringify({
             encrypted,
             iv: iv.toString('hex'),
@@ -174,7 +174,7 @@ class SecurityBridgeManager extends events_1.EventEmitter {
     async decryptPayload(encryptedData) {
         const { encrypted, iv, tag } = JSON.parse(encryptedData);
         const decipher = (0, crypto_1.createDecipheriv)(this.policy.encryption.algorithm, this.encryptionKey, Buffer.from(iv, 'hex'));
-        decipher.setAuthTag(Buffer.from(tag, 'hex'));
+        decipher.setAuthTag(Buffer.from(tag, 'hex')); // Cast for GCM mode support
         let decrypted = decipher.update(encrypted, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return JSON.parse(decrypted);

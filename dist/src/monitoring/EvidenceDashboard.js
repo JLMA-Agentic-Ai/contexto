@@ -6,6 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EvidenceDashboard = void 0;
 const events_1 = require("events");
+const WorkflowOrchestrator_1 = require("../orchestration/WorkflowOrchestrator");
 /**
  * Evidence Dashboard for Real-time Quality Monitoring
  */
@@ -139,7 +140,7 @@ class EvidenceDashboard extends events_1.EventEmitter {
         const decisions = evidence.decisions;
         if (decisions.length === 0)
             return 'INSUFFICIENT';
-        const solidCount = decisions.filter(d => d.evidence === 'SOLID').length;
+        const solidCount = decisions.filter(d => d.confidence >= WorkflowOrchestrator_1.EvidenceConfidence.SOLID).length;
         const softCount = decisions.filter(d => d.evidence === 'SOFT').length;
         const shakyCount = decisions.filter(d => d.evidence === 'SHAKY').length;
         const unknownCount = decisions.filter(d => d.evidence === 'UNKNOWN').length;
