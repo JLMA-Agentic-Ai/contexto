@@ -2,7 +2,7 @@
  * Main Platform Entry Point for Visión Maestra
  * Initializes and coordinates all 6 components
  */
-import { PlatformConfig } from '../../config/platform/platform-config';
+import { PlatformConfig } from '../../../config/platform/platform-config';
 export declare class VisionMaestraPlatform {
     private orchestrator;
     private config;

@@ -30,6 +30,21 @@ export interface WorkflowResult {
   artifacts: WorkflowArtifact[];
 }
 
+export interface WorkflowArtifact {
+  id: string;
+  name: string;
+  type: string;
+  content: any;
+  timestamp: Date;
+}
+
+export interface Investigation {
+  id: string;
+  title: string;
+  status: string;
+  findings: any[];
+}
+
 export interface EvidenceTracker {
   decisions: EvidenceDecision[];
   investigations: Investigation[];

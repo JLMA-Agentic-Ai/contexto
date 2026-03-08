@@ -7,7 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VisionMaestraPlatform = void 0;
 exports.startPlatform = startPlatform;
 const platform_orchestrator_1 = require("./platform-orchestrator");
-const platform_config_1 = require("../../config/platform/platform-config");
+const platform_config_1 = require("../../../config/platform/platform-config");
 class VisionMaestraPlatform {
     orchestrator;
     config;

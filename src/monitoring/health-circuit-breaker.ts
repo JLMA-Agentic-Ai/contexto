@@ -102,7 +102,7 @@ export class HealthCircuitBreaker extends EventEmitter {
   private failoverConfigs: Map<string, FailoverConfig> = new Map();
   private circuitConfigs: Map<string, CircuitBreakerConfig> = new Map();
 
-  private monitoringIntervals: Map<string, NodeJS.Timer> = new Map();
+  private monitoringIntervals: Map<string, NodeJS.Timeout> = new Map();
   private lastAlertTimes: Map<string, Date> = new Map();
   private requestCounts: Map<string, { success: number; failure: number; slow: number }> = new Map();
 

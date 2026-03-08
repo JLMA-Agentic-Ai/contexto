@@ -4,10 +4,10 @@
  */
 
 import { PlatformOrchestrator } from './platform-orchestrator';
-import { PlatformConfig } from '../../config/platform/platform-config';
-import { DossierRufloBridge } from '../bridges/dossier-ruflo/dossier-ruflo-bridge';
-import { RufloADWBridge } from '../bridges/ruflo-adw/ruflo-adw-bridge';
-import { GitNexusRLMBridge } from '../bridges/gitnexus-rlm/gitnexus-rlm-bridge';
+import { PlatformConfig } from '../../../config/platform/platform-config';
+import { DossierRufloBridge } from '../../bridges/dossier-ruflo/dossier-ruflo-bridge';
+import { RufloADWBridge } from '../../bridges/ruflo-adw/ruflo-adw-bridge';
+import { GitNexusRLMBridge } from '../../bridges/gitnexus-rlm/gitnexus-rlm-bridge';
 
 export class VisionMaestraPlatform {
   private orchestrator: PlatformOrchestrator;

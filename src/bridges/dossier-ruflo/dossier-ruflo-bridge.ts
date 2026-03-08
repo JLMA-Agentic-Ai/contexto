@@ -233,7 +233,7 @@ export class DossierRufloBridge extends ComponentBridge {
 
     try {
       // Check WebSocket server health
-      const wsHealth = this.wsServer?.readyState === WebSocket.OPEN;
+      const wsHealth = this.wsServer !== undefined;
 
       // Check RufloV3 connection health
       const rufloHealth = await this.checkRufloHealth();

@@ -91,7 +91,7 @@ export class SixComponentBridgeOrchestrator extends EventEmitter {
   private healthMonitor: HealthCircuitBreaker;
 
   private isInitialized = false;
-  private metricsInterval?: NodeJS.Timer;
+  private metricsInterval?: NodeJS.Timeout;
 
   constructor(private config: {
     securityPolicy: any;
