@@ -10,31 +10,32 @@
  * 5. RLM Navigator ↔ Dossier (Navigation results)
  * 6. Claude Code ↔ ADW Skills (Validation results)
  */
+import Joi from 'joi';
 import { SecurityAuditLogger } from './audit-logger';
 export declare class InputValidationSchemas {
     private auditLogger;
     readonly dossierRufloSchemas: {
-        projectInit: any;
-        taskStatus: any;
+        projectInit: Joi.ObjectSchema<any>;
+        taskStatus: Joi.ObjectSchema<any>;
     };
     readonly rufloGitnexusSchemas: {
-        analysisRequest: any;
-        analysisResults: any;
+        analysisRequest: Joi.ObjectSchema<any>;
+        analysisResults: Joi.ObjectSchema<any>;
     };
     readonly adwRlmSchemas: {
-        investigationRequest: any;
-        navigationResults: any;
+        investigationRequest: Joi.ObjectSchema<any>;
+        navigationResults: Joi.ObjectSchema<any>;
     };
     readonly gitnexusClaudeSchemas: {
-        executionRequest: any;
-        executionResults: any;
+        executionRequest: Joi.ObjectSchema<any>;
+        executionResults: Joi.ObjectSchema<any>;
     };
     readonly rlmDossierSchemas: {
-        visualizationData: any;
+        visualizationData: Joi.ObjectSchema<any>;
     };
     readonly claudeAdwSchemas: {
-        validationRequest: any;
-        validationResults: any;
+        validationRequest: Joi.ObjectSchema<any>;
+        validationResults: Joi.ObjectSchema<any>;
     };
     constructor(auditLogger: SecurityAuditLogger);
     /**

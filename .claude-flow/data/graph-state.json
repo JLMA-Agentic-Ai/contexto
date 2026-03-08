@@ -6,29 +6,29 @@
     "mem-MEMORY-project--contexto": {
       "id": "mem-MEMORY-project--contexto",
       "category": "core",
-      "confidence": 0.7500000000000002,
-      "accessCount": 5,
+      "confidence": 0.8000000000000003,
+      "accessCount": 6,
       "createdAt": 1772929575028
     },
     "mem-MEMORY-key-patterns": {
       "id": "mem-MEMORY-key-patterns",
       "category": "core",
-      "confidence": 0.7500000000000002,
-      "accessCount": 5,
+      "confidence": 0.8000000000000003,
+      "accessCount": 6,
       "createdAt": 1772929575028
     },
     "mem-MEMORY-recent-activities": {
       "id": "mem-MEMORY-recent-activities",
       "category": "core",
-      "confidence": 0.7500000000000002,
-      "accessCount": 5,
+      "confidence": 0.8000000000000003,
+      "accessCount": 6,
       "createdAt": 1772929575028
     },
     "insight-1772935220437-dvdu": {
       "id": "insight-1772935220437-dvdu",
       "category": "insights",
-      "confidence": 0.7000000000000002,
-      "accessCount": 4,
+      "confidence": 0.7500000000000002,
+      "accessCount": 5,
       "createdAt": 1772935220437
     }
   },

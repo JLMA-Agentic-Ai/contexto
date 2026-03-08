@@ -55,7 +55,7 @@ export declare class SecurityBridgeManager extends EventEmitter {
     private activeSessions;
     private rateLimitTracker;
     private threatCount;
-    constructor(policy: SecurityPolicy, masterKey?: string | undefined);
+    constructor(policy: SecurityPolicy, masterKey?: string);
     /**
      * Secure message transmission between components
      */
