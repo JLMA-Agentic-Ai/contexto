@@ -1,12 +1,12 @@
 {
   "startTime": "2026-03-05T16:55:35.349Z",
-  "lastCheck": "2026-03-08T01:42:28.919Z",
-  "uptime": 0,
+  "lastCheck": "2026-03-08T01:59:28.662Z",
+  "uptime": 205433313,
   "health": 1,
-  "cpu": 25,
+  "cpu": 35.25,
   "memory": {
-    "used": 256,
-    "total": 1024
+    "used": 5842,
+    "total": 7751
   },
   "agents": {
     "active": 0,

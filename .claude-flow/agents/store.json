@@ -333,6 +333,45 @@
       "createdAt": "2026-03-05T21:24:07.474Z",
       "model": "sonnet",
       "modelRoutedBy": "default"
+    },
+    "agent-1772935129815-85v33e": {
+      "agentId": "agent-1772935129815-85v33e",
+      "agentType": "coordinator",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-08T01:58:49.815Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772935130809-obhht4": {
+      "agentId": "agent-1772935130809-obhht4",
+      "agentType": "core-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-08T01:58:50.809Z",
+      "model": "opus",
+      "modelRoutedBy": "default"
+    },
+    "agent-1772935131825-zxs40f": {
+      "agentId": "agent-1772935131825-zxs40f",
+      "agentType": "swarm-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "provider": "anthropic"
+      },
+      "createdAt": "2026-03-08T01:58:51.825Z",
+      "model": "sonnet",
+      "modelRoutedBy": "default"
     }
   },
   "version": "3.0.0"

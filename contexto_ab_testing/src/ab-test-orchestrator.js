@@ -36,17 +36,17 @@ class ABTestOrchestrator {
         // This will be replaced by interactive CLI prompts
         const defaultConfig = {
             repository: {
-                path: '/workspaces/jlmaworkspace/new_projects/new_ideas/contexto',
-                name: 'contexto'
+                path: '/workspaces/jlmaworkspace',
+                name: 'contexto-workspace'
             },
-            investigationQuestion: "¿Cuál es el impacto de cambiar la función authenticate() para soporte multi-factor?",
+            investigationQuestion: "¿Cómo funciona el sistema de memoria de RuFlo usando AgentDB + Ruvector para almacenamiento persistente? ¿Cómo debería almacenar auto-memory hooks?",
             testCases: [
-                "Análisis de impacto de refactoring",
-                "Auditoría de deuda técnica",
-                "Comprensión de flujo de autenticación"
+                "Análisis de AgentDB + Ruvector",
+                "Investigación de auto-memory hooks storage",
+                "Arquitectura de memoria persistente RuFlo"
             ],
             metrics: {
-                timeThreshold: 300, // 5 minutes max per investigation
+                timeThreshold: 600, // 10 minutes max per investigation
                 accuracyTarget: 0.85,
                 coverageTarget: 0.90
             }
@@ -160,13 +160,10 @@ class ABTestOrchestrator {
      */
     async initializeSwarm(type, config) {
         try {
-            // Use global ruflo command to initialize swarm
+            // Use global ruflo command to initialize swarm with V3 mode
             const swarmInit = spawn('ruflo', [
                 'swarm', 'init',
-                '--topology', config.topology,
-                '--max-agents', config.maxAgents.toString(),
-                '--strategy', config.strategy,
-                '--id', config.id
+                '--v3-mode'
             ]);
 
             return new Promise((resolve, reject) => {
@@ -400,6 +397,14 @@ class ABTestOrchestrator {
                 recommendedApproach: experimentalTime < controlTime ? 'GitNexus+RLM' : 'Traditional'
             }
         };
+
+        // Truncate large outputs for JSON compatibility
+        if (report.results.control.findings) {
+            report.results.control.findings = this.truncateFindings(report.results.control.findings, 5000);
+        }
+        if (report.results.experimental.findings) {
+            report.results.experimental.findings = this.truncateFindings(report.results.experimental.findings, 5000);
+        }
 
         // Save report
         await fs.writeFile(

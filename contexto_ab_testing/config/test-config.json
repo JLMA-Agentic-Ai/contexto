@@ -1,16 +1,16 @@
 {
   "repository": {
-    "path": "/workspaces/jlmaworkspace/new_projects/new_ideas/contexto",
-    "name": "contexto"
+    "path": "/workspaces/jlmaworkspace",
+    "name": "contexto-workspace"
   },
-  "investigationQuestion": "¿Cuál es el impacto de cambiar la función authenticate() para soporte multi-factor?",
+  "investigationQuestion": "¿Cómo funciona el sistema de memoria de RuFlo usando AgentDB + Ruvector para almacenamiento persistente? ¿Cómo debería almacenar auto-memory hooks?",
   "testCases": [
-    "Análisis de impacto de refactoring",
-    "Auditoría de deuda técnica",
-    "Comprensión de flujo de autenticación"
+    "Análisis de AgentDB + Ruvector",
+    "Investigación de auto-memory hooks storage",
+    "Arquitectura de memoria persistente RuFlo"
   ],
   "metrics": {
-    "timeThreshold": 300,
+    "timeThreshold": 600,
     "accuracyTarget": 0.85,
     "coverageTarget": 0.9
   }

@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-03-08T01:38:39.217Z",
+  "timestamp": "2026-03-08T01:53:39.268Z",
   "projectRoot": "/workspaces/jlmaworkspace/new_projects/new_ideas/contexto",
   "structure": {
-    "hasPackageJson": false,
-    "hasTsConfig": false,
+    "hasPackageJson": true,
+    "hasTsConfig": true,
     "hasClaudeConfig": true,
     "hasClaudeFlow": true
   },
-  "scannedAt": 1772933919217
+  "scannedAt": 1772934819269
 }

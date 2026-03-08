@@ -1,0 +1,18 @@
+# contexto_ab_testing/config/test-config.json lines 1-17
+{
+  "repository": {
+    "path": "/workspaces/jlmaworkspace",
+    "name": "contexto-workspace"
+  },
+  "investigationQuestion": "¿Cómo funciona el sistema de memoria de RuFlo usando AgentDB + Ruvector para almacenamiento persistente? ¿Cómo debería almacenar auto-memory hooks?",
+  "testCases": [
+    "Análisis de AgentDB + Ruvector",
+    "Investigación de auto-memory hooks storage",
+    "Arquitectura de memoria persistente RuFlo"
+  ],
+  "metrics": {
+    "timeThreshold": 600,
+    "accuracyTarget": 0.85,
+    "coverageTarget": 0.9
+  }
+}

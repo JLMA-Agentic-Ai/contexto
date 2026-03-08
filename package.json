@@ -1,0 +1,183 @@
+{
+  "name": "vision-maestra-platform",
+  "version": "1.0.0",
+  "description": "Autonomous Development Platform - Integration of 6 Core Components",
+  "main": "dist/src/platform/core/platform-main.js",
+  "bin": {
+    "vision-maestra": "./dist/src/platform/core/platform-main.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/src/platform/core/platform-main.js",
+    "dev": "tsx src/platform/core/platform-main.ts",
+    "dev:debug": "DEBUG=vision-maestra:* tsx src/platform/core/platform-main.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "type-check": "tsc --noEmit",
+    "health-check": "curl -f http://localhost:8080/api/health || exit 1",
+    "status": "node -e \"fetch('http://localhost:8080/api/health').then(r=>r.json()).then(console.log).catch(()=>console.log('Platform not running'))\"",
+    "logs": "tail -f logs/platform.log",
+    "logs:component": "node scripts/component-logs.js",
+    "logs:cleanup": "find logs -name '*.log' -mtime +7 -delete",
+    "metrics": "curl -s http://localhost:8080/api/metrics | jq",
+    "metrics:memory": "node -e \"console.log('Memory Usage:', process.memoryUsage())\"",
+    "metrics:collect": "node scripts/collect-metrics.js",
+    "monitor:components": "watch -n 5 'curl -s http://localhost:8080/api/health/components'",
+    "monitor:performance": "node scripts/performance-monitor.js",
+    "restart:bridge": "node scripts/restart-bridge.js",
+    "analyze:performance": "node scripts/analyze-performance.js",
+    "analyze:capacity": "node scripts/analyze-capacity.js",
+    "config:validate": "node scripts/validate-config.js",
+    "backup:verify": "node scripts/verify-backup.js",
+    "setup": "node scripts/setup-platform.js",
+    "setup:dev": "npm run setup && npm run build && npm run dev",
+    "setup:prod": "npm run setup && npm run build && npm run start",
+    "clean": "rm -rf dist node_modules/.cache logs/temp",
+    "reset": "npm run clean && npm install && npm run build",
+    "docker:build": "docker build -t vision-maestra .",
+    "docker:run": "docker run -p 3000:3000 -p 8080:8080 -p 8081:8081 vision-maestra",
+    "deploy": "node scripts/deploy.js"
+  },
+  "keywords": [
+    "autonomous-development",
+    "platform",
+    "integration",
+    "dossier",
+    "ruflo-v3",
+    "adw-skills",
+    "gitnexus",
+    "rlm-navigator",
+    "claude-code",
+    "development-automation",
+    "workflow-orchestration",
+    "real-time-collaboration"
+  ],
+  "author": "Vision Maestra Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vision-maestra/platform.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vision-maestra/platform/issues"
+  },
+  "homepage": "https://vision-maestra.dev",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@claude-flow/cli": "latest",
+    "ws": "^8.14.2",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "config": "^3.3.9",
+    "joi": "^17.11.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "uuid": "^9.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "rate-limiter-flexible": "^3.0.8",
+    "node-cron": "^3.0.3",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "pino": "^8.15.1",
+    "pino-pretty": "^10.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/express": "^4.17.17",
+    "@types/ws": "^8.5.5",
+    "@types/cors": "^2.8.14",
+    "@types/compression": "^1.7.3",
+    "@types/morgan": "^1.9.5",
+    "@types/lodash": "^4.14.199",
+    "@types/uuid": "^9.0.4",
+    "@types/jsonwebtoken": "^9.0.3",
+    "@types/bcryptjs": "^2.4.4",
+    "@types/node-cron": "^3.0.9",
+    "@types/jest": "^29.5.5",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "tsx": "^3.13.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "supertest": "^6.3.3",
+    "wscat": "^5.2.0",
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.1",
+    "cross-env": "^7.0.3"
+  },
+  "optionalDependencies": {
+    "gitnexus": "latest",
+    "@grpc/grpc-js": "^1.9.5",
+    "@grpc/proto-loader": "^0.7.9",
+    "redis": "^4.6.10",
+    "mongodb": "^6.1.0",
+    "pg": "^8.11.3"
+  },
+  "peerDependencies": {
+    "next": "^13.0.0 || ^14.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/**/*.test.ts",
+      "!src/**/*.spec.ts"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.test.ts",
+      "**/?(*.)+(spec|test).ts"
+    ],
+    "moduleNameMapping": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    }
+  },
+  "eslintConfig": {
+    "extends": [
+      "@typescript-eslint/recommended",
+      "prettier"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint",
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "error"
+    }
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "printWidth": 80,
+    "tabWidth": 2
+  },
+  "config": {
+    "platform": {
+      "configPath": "./config/platform/platform-config.ts",
+      "logLevel": "info",
+      "environment": "development"
+    }
+  }
+}

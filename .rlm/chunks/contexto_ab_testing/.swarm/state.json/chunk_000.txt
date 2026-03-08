@@ -1,0 +1,10 @@
+# contexto_ab_testing/.swarm/state.json lines 1-9
+{
+  "id": "swarm-1772909897337",
+  "topology": "hierarchical-mesh",
+  "maxAgents": 15,
+  "strategy": "development",
+  "v3Mode": true,
+  "initializedAt": "2026-03-07T18:58:17.337Z",
+  "status": "ready"
+}

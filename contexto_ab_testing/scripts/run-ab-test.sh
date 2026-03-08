@@ -61,7 +61,7 @@ start_services() {
     echo "🗂️ Iniciando RLM Navigator daemon..."
     source "$VENV_DIR/bin/activate"
     cd "$RLM_DIR"
-    python daemon/rlm_daemon.py --port 8003 --repo-path "$CONTEXTO_DIR" &
+    python daemon/rlm_daemon.py --root "$CONTEXTO_DIR" --port 8003 &
     RLM_PID=$!
     echo "✅ RLM Navigator daemon iniciado (PID: $RLM_PID)"
 

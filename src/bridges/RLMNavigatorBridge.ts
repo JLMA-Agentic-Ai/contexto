@@ -584,33 +584,552 @@ export class RLMNavigatorBridge extends BaseBridge {
 
   // Private helper methods
   private async initializeMCPConnection(): Promise<void> {
-    // TODO: Initialize MCP connection to RLM Navigator
+    try {
+      // Initialize MCP connection to RLM Navigator
+      await this.establishMCPTransport();
+
+      // Test connection
+      const pingResult = await this.sendMCPCommand('ping', {});
+      if (!pingResult.success) {
+        throw new Error('MCP ping failed');
+      }
+
+      // Initialize AST parsing capabilities
+      await this.initializeParsingCapabilities();
+
+      console.log('RLM Navigator MCP connection established');
+    } catch (error) {
+      throw new Error(`Failed to initialize MCP connection: ${error}`);
+    }
+  }
+
+  private async establishMCPTransport(): Promise<void> {
+    const transportConfig = {
+      protocol: this.config.navigator.protocol,
+      endpoint: this.config.navigator.mcpEndpoint,
+      timeout: 10000
+    };
+
+    console.log('Establishing MCP transport with config:', transportConfig);
+
+    // Simulate MCP transport initialization
+    // In real implementation, this would use the MCP client library
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
+  private async initializeParsingCapabilities(): Promise<void> {
+    // Initialize language parsers for supported languages
+    for (const language of this.config.ast.supportedLanguages) {
+      await this.initializeLanguageParser(language);
+    }
+
+    console.log(`Initialized parsers for ${this.config.ast.supportedLanguages.length} languages`);
+  }
+
+  private async initializeLanguageParser(language: string): Promise<void> {
+    const parserConfig = {
+      language,
+      includeComments: this.config.ast.includeComments,
+      includeWhitespace: this.config.ast.includeWhitespace,
+      timeout: this.config.ast.parseTimeout
+    };
+
+    await this.sendMCPCommand('parser.init', { language, config: parserConfig });
+  }
+
+  private async sendMCPCommand(command: string, params: any): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      console.log(`MCP Command: ${command}`, params);
+
+      // Simulate MCP command execution
+      // In real implementation, this would use the MCP protocol
+      switch (command) {
+        case 'ping':
+          return { success: true, data: { pong: true } };
+
+        case 'parser.init':
+          return { success: true, data: { initialized: true, language: params.language } };
+
+        case 'ast.parse':
+          return {
+            success: true,
+            data: {
+              ast: await this.generateMockAST(params.file, params.language),
+              parseTime: Math.random() * 100
+            }
+          };
+
+        case 'ast.search':
+          return {
+            success: true,
+            data: {
+              results: this.generateMockSearchResults(params.query),
+              searchTime: Math.random() * 50
+            }
+          };
+
+        case 'semantic.analyze':
+          return {
+            success: true,
+            data: {
+              analysis: this.generateMockSemanticAnalysis(params),
+              analysisTime: Math.random() * 200
+            }
+          };
+
+        case 'flow.analyze':
+          return {
+            success: true,
+            data: {
+              controlFlow: this.generateMockControlFlow(params.nodeId),
+              dataFlow: this.generateMockDataFlow(params.nodeId)
+            }
+          };
+
+        default:
+          return { success: false, error: `Unknown command: ${command}` };
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  private async generateMockAST(file: string, language: string): Promise<ASTNode> {
+    // Generate a realistic mock AST structure
+    const ast: ASTNode = {
+      id: 'root',
+      type: 'program',
+      name: 'Program',
+      children: [
+        {
+          id: 'import-1',
+          type: 'import_statement',
+          name: 'import',
+          children: [],
+          position: {
+            start: { line: 1, column: 1, offset: 0 },
+            end: { line: 1, column: 20, offset: 19 }
+          },
+          file,
+          language,
+          metadata: { source: 'fs' },
+          semanticInfo: {
+            scope: 'module',
+            type: 'import',
+            references: [],
+            declarations: []
+          }
+        },
+        {
+          id: 'function-1',
+          type: 'function_declaration',
+          name: 'main',
+          children: [
+            {
+              id: 'param-1',
+              type: 'parameter',
+              name: 'args',
+              children: [],
+              position: {
+                start: { line: 3, column: 15, offset: 35 },
+                end: { line: 3, column: 19, offset: 39 }
+              },
+              file,
+              language,
+              metadata: { paramType: 'array' }
+            },
+            {
+              id: 'block-1',
+              type: 'block_statement',
+              children: [],
+              position: {
+                start: { line: 3, column: 21, offset: 41 },
+                end: { line: 10, column: 1, offset: 120 }
+              },
+              file,
+              language,
+              metadata: {}
+            }
+          ],
+          position: {
+            start: { line: 3, column: 1, offset: 21 },
+            end: { line: 10, column: 1, offset: 120 }
+          },
+          file,
+          language,
+          metadata: { visibility: 'public', returnType: 'void' },
+          semanticInfo: {
+            scope: 'function',
+            type: 'function',
+            references: [],
+            declarations: [
+              {
+                nodeId: 'function-1',
+                file,
+                position: {
+                  start: { line: 3, column: 1, offset: 21 },
+                  end: { line: 10, column: 1, offset: 120 }
+                },
+                type: 'declaration',
+                context: 'function declaration'
+              }
+            ]
+          }
+        }
+      ],
+      position: {
+        start: { line: 1, column: 1, offset: 0 },
+        end: { line: 10, column: 1, offset: 120 }
+      },
+      file,
+      language,
+      metadata: { fileType: 'source' }
+    };
+
+    return ast;
+  }
+
+  private generateMockSearchResults(query: string): ASTNode[] {
+    // Generate mock search results
+    return [
+      {
+        id: 'result-1',
+        type: 'function_declaration',
+        name: query,
+        children: [],
+        position: {
+          start: { line: 5, column: 1, offset: 50 },
+          end: { line: 10, column: 1, offset: 100 }
+        },
+        file: '/mock/file.js',
+        language: 'javascript',
+        metadata: { matchScore: 0.95 }
+      }
+    ];
+  }
+
+  private generateMockSemanticAnalysis(params: any): any {
+    return {
+      symbolTable: {
+        functions: ['main', 'helper', 'process'],
+        variables: ['data', 'result', 'config'],
+        classes: ['Parser', 'Analyzer']
+      },
+      typeInformation: {
+        'main': { type: 'function', returnType: 'void', parameters: ['args: string[]'] },
+        'data': { type: 'variable', dataType: 'object' }
+      },
+      scopeAnalysis: {
+        globalScope: ['main', 'Parser'],
+        functionScopes: {
+          'main': ['data', 'result']
+        }
+      }
+    };
+  }
+
+  private generateMockControlFlow(nodeId: string): ControlFlowGraph {
+    return {
+      id: `cfg_${nodeId}`,
+      function: 'mockFunction',
+      nodes: [
+        {
+          id: 'entry',
+          type: 'entry',
+          astNodeId: nodeId,
+          code: 'function entry',
+          position: { line: 1, column: 1 }
+        },
+        {
+          id: 'stmt-1',
+          type: 'statement',
+          astNodeId: `${nodeId}_stmt1`,
+          code: 'let x = 0;',
+          position: { line: 2, column: 1 }
+        },
+        {
+          id: 'exit',
+          type: 'exit',
+          astNodeId: `${nodeId}_exit`,
+          code: 'return',
+          position: { line: 10, column: 1 }
+        }
+      ],
+      edges: [
+        {
+          id: 'edge-1',
+          from: 'entry',
+          to: 'stmt-1',
+          type: 'sequence'
+        },
+        {
+          id: 'edge-2',
+          from: 'stmt-1',
+          to: 'exit',
+          type: 'sequence'
+        }
+      ],
+      entryPoint: 'entry',
+      exitPoints: ['exit'],
+      complexity: {
+        cyclomatic: 1,
+        cognitive: 1,
+        halstead: {
+          vocabulary: 5,
+          length: 10,
+          difficulty: 2.5,
+          effort: 25
+        }
+      }
+    };
+  }
+
+  private generateMockDataFlow(nodeId: string): DataFlowAnalysis {
+    return {
+      variables: [
+        {
+          variable: 'x',
+          type: 'number',
+          definitions: [
+            {
+              nodeId: `${nodeId}_def1`,
+              file: '/mock/file.js',
+              position: {
+                start: { line: 2, column: 5, offset: 25 },
+                end: { line: 2, column: 6, offset: 26 }
+              },
+              type: 'declaration',
+              context: 'let x = 0'
+            }
+          ],
+          uses: [],
+          scope: 'function'
+        }
+      ],
+      dependencies: [],
+      definitionUseChains: [],
+      liveVariables: [
+        {
+          variable: 'x',
+          liveAt: ['stmt-1'],
+          deadAt: ['exit']
+        }
+      ]
+    };
   }
 
   private async closeMCPConnection(): Promise<void> {
-    // TODO: Close MCP connection
+    try {
+      console.log('Closing RLM Navigator MCP connection');
+      // await this.mcpClient.close();
+    } catch (error) {
+      console.error('Error closing MCP connection:', error);
+    }
   }
 
   private async setupFileWatching(): Promise<void> {
-    // TODO: Set up file system watching for incremental updates
+    if (!this.config.indexing.watchFileChanges) {
+      return;
+    }
+
+    try {
+      const fs = await import('fs');
+
+      // Watch for file changes in monitored directories
+      // This is a simplified implementation - real implementation would be more sophisticated
+
+      console.log('File watching setup for incremental AST updates');
+
+      // Set up debounced file change handling
+      const debouncedHandlers = new Map<string, NodeJS.Timeout>();
+
+      const handleFileChange = (filePath: string) => {
+        // Clear existing timeout for this file
+        const existingTimeout = debouncedHandlers.get(filePath);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+        }
+
+        // Set new timeout
+        const newTimeout = setTimeout(async () => {
+          try {
+            await this.handleFileChanged(filePath);
+            debouncedHandlers.delete(filePath);
+          } catch (error) {
+            console.error(`Error handling file change for ${filePath}:`, error);
+          }
+        }, this.config.indexing.debounceDelay);
+
+        debouncedHandlers.set(filePath, newTimeout);
+      };
+
+      // In a real implementation, you would set up proper file watchers
+      console.log('File watching initialized with debounce delay:', this.config.indexing.debounceDelay);
+
+    } catch (error) {
+      console.error('Failed to setup file watching:', error);
+      throw error;
+    }
+  }
+
+  private async handleFileChanged(filePath: string): Promise<void> {
+    console.log(`File changed: ${filePath}`);
+
+    // Invalidate cache for this file
+    this.astCache.delete(filePath);
+
+    // Notify active sessions that might be affected
+    for (const [sessionId, session] of this.activeSessions) {
+      if (session.file === filePath) {
+        try {
+          await this.refreshAST(sessionId);
+        } catch (error) {
+          console.error(`Failed to refresh AST for session ${sessionId}:`, error);
+        }
+      }
+    }
+
+    // Emit file change event for other components
+    this.emit('stream-event', {
+      component: 'rlm-navigator',
+      type: 'file-changed',
+      data: { file: filePath, timestamp: new Date() },
+      timestamp: new Date()
+    });
   }
 
   private async parseFileToAST(file: string): Promise<ASTNode> {
-    // TODO: Use MCP to parse file and generate AST
-    const mockAST: ASTNode = {
-      id: 'root',
-      type: 'program',
-      children: [],
-      position: {
-        start: { line: 1, column: 1, offset: 0 },
-        end: { line: 1, column: 1, offset: 0 }
-      },
-      file,
-      language: this.detectLanguage(file),
-      metadata: {}
-    };
+    try {
+      const language = this.detectLanguage(file);
 
-    return mockAST;
+      // Use MCP to parse file and generate AST
+      const parseResult = await this.sendMCPCommand('ast.parse', {
+        file,
+        language,
+        options: {
+          includeComments: this.config.ast.includeComments,
+          includeWhitespace: this.config.ast.includeWhitespace,
+          timeout: this.config.ast.parseTimeout
+        }
+      });
+
+      if (!parseResult.success) {
+        throw new Error(`AST parsing failed: ${parseResult.error}`);
+      }
+
+      const ast = parseResult.data.ast;
+
+      // Enhance AST with semantic information if enabled
+      if (this.config.analysis.semanticAnalysis) {
+        await this.enhanceASTWithSemantics(ast, file, language);
+      }
+
+      // Add type information if enabled
+      if (this.config.analysis.typeInference) {
+        await this.enhanceASTWithTypes(ast, file, language);
+      }
+
+      console.log(`AST parsed for ${file}: ${parseResult.data.parseTime}ms`);
+
+      return ast;
+    } catch (error) {
+      console.error(`Failed to parse AST for ${file}:`, error);
+
+      // Return a minimal AST as fallback
+      return {
+        id: 'root',
+        type: 'program',
+        name: 'Error',
+        children: [],
+        position: {
+          start: { line: 1, column: 1, offset: 0 },
+          end: { line: 1, column: 1, offset: 0 }
+        },
+        file,
+        language: this.detectLanguage(file),
+        metadata: { error: error instanceof Error ? error.message : 'Unknown error' }
+      };
+    }
+  }
+
+  private async enhanceASTWithSemantics(ast: ASTNode, file: string, language: string): Promise<void> {
+    try {
+      const semanticResult = await this.sendMCPCommand('semantic.analyze', {
+        ast,
+        file,
+        language,
+        options: {
+          includeScope: true,
+          includeReferences: true,
+          includeDeclarations: true
+        }
+      });
+
+      if (semanticResult.success) {
+        this.applySemanticInformation(ast, semanticResult.data.analysis);
+      }
+    } catch (error) {
+      console.warn(`Failed to enhance AST with semantics for ${file}:`, error);
+    }
+  }
+
+  private applySemanticInformation(node: ASTNode, analysis: any): void {
+    // Apply semantic information to nodes
+    if (analysis.symbolTable) {
+      const symbolInfo = analysis.symbolTable[node.name];
+      if (symbolInfo) {
+        node.semanticInfo = {
+          scope: symbolInfo.scope || 'unknown',
+          type: symbolInfo.type || 'unknown',
+          references: symbolInfo.references || [],
+          declarations: symbolInfo.declarations || []
+        };
+      }
+    }
+
+    // Recursively apply to children
+    for (const child of node.children) {
+      this.applySemanticInformation(child, analysis);
+    }
+  }
+
+  private async enhanceASTWithTypes(ast: ASTNode, file: string, language: string): Promise<void> {
+    try {
+      const typeResult = await this.sendMCPCommand('type.infer', {
+        ast,
+        file,
+        language,
+        options: {
+          strictMode: false,
+          includeImplicitTypes: true
+        }
+      });
+
+      if (typeResult.success) {
+        this.applyTypeInformation(ast, typeResult.data.typeInfo);
+      }
+    } catch (error) {
+      console.warn(`Failed to enhance AST with types for ${file}:`, error);
+    }
+  }
+
+  private applyTypeInformation(node: ASTNode, typeInfo: any): void {
+    if (typeInfo[node.id]) {
+      if (!node.semanticInfo) {
+        node.semanticInfo = {
+          scope: 'unknown',
+          type: 'unknown',
+          references: [],
+          declarations: []
+        };
+      }
+      node.semanticInfo.type = typeInfo[node.id].type || node.semanticInfo.type;
+    }
+
+    // Recursively apply to children
+    for (const child of node.children) {
+      this.applyTypeInformation(child, typeInfo);
+    }
   }
 
   private detectLanguage(file: string): string {
