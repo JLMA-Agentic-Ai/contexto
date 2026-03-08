@@ -7,7 +7,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DossierBridge = void 0;
 const BaseBridge_js_1 = require("./base/BaseBridge.js");
 class DossierBridge extends BaseBridge_js_1.BaseBridge {
-    config;
     webSocket;
     uiStates = new Map();
     activeTasks = new Map();

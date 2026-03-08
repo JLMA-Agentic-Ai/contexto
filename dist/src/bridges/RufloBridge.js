@@ -7,7 +7,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RufloBridge = void 0;
 const BaseBridge_js_1 = require("./base/BaseBridge.js");
 class RufloBridge extends BaseBridge_js_1.BaseBridge {
-    config;
     activeSwarms = new Map();
     agents = new Map();
     tasks = new Map();

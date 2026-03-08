@@ -7,7 +7,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClaudeCodeBridge = void 0;
 const BaseBridge_js_1 = require("./base/BaseBridge.js");
 class ClaudeCodeBridge extends BaseBridge_js_1.BaseBridge {
-    config;
     activeExecutions = new Map();
     activeAgents = new Map();
     coordinations = new Map();

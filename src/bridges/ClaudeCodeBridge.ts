@@ -274,7 +274,7 @@ export interface ClaudeCodeEvent extends BridgeEvent {
 }
 
 export class ClaudeCodeBridge extends BaseBridge {
-  protected config: ClaudeCodeConfig;
+  protected declare config: ClaudeCodeConfig;
   private activeExecutions: Map<string, CodeExecution> = new Map();
   private activeAgents: Map<string, Agent> = new Map();
   private coordinations: Map<string, TaskCoordination> = new Map();
@@ -991,7 +991,7 @@ export class ClaudeCodeBridge extends BaseBridge {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as any;
         return data.tools || [];
       }
 
@@ -1116,7 +1116,7 @@ export class ClaudeCodeBridge extends BaseBridge {
         throw new Error(`Agent spawn request failed: ${response.status}`);
       }
 
-      const result = await response.json();
+      const result = await response.json() as any;
 
       // Update agent with spawn result
       agent.status = result.status || 'idle';
@@ -1508,7 +1508,7 @@ export class ClaudeCodeBridge extends BaseBridge {
         throw new Error(`Tool execution failed: ${response.status} ${response.statusText}`);
       }
 
-      const result = await response.json();
+      const result = await response.json() as any;
 
       invocation.metrics.executionTime = Date.now() - startTime;
       invocation.metrics.memoryUsed = result.metrics?.memoryUsed || 0;

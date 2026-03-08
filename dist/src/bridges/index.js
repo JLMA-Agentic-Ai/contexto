@@ -20,27 +20,27 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.bridgeRegistry = exports.bridgeFactory = exports.DefaultBridgeRegistry = exports.DefaultBridgeFactory = exports.BridgeUtils = exports.ClaudeCodeBridge = exports.RLMNavigatorBridge = exports.GitNexusBridge = exports.ADWSkillsBridge = exports.RufloBridge = exports.DossierBridge = exports.BaseBridge = void 0;
 exports.setupBridges = setupBridges;
-// Core bridge implementations
-var BaseBridge_js_1 = require("./base/BaseBridge.js");
-Object.defineProperty(exports, "BaseBridge", { enumerable: true, get: function () { return BaseBridge_js_1.BaseBridge; } });
-var DossierBridge_js_1 = require("./DossierBridge.js");
-Object.defineProperty(exports, "DossierBridge", { enumerable: true, get: function () { return DossierBridge_js_1.DossierBridge; } });
-var RufloBridge_js_1 = require("./RufloBridge.js");
-Object.defineProperty(exports, "RufloBridge", { enumerable: true, get: function () { return RufloBridge_js_1.RufloBridge; } });
-var ADWSkillsBridge_js_1 = require("./ADWSkillsBridge.js");
-Object.defineProperty(exports, "ADWSkillsBridge", { enumerable: true, get: function () { return ADWSkillsBridge_js_1.ADWSkillsBridge; } });
-var GitNexusBridge_js_1 = require("./GitNexusBridge.js");
-Object.defineProperty(exports, "GitNexusBridge", { enumerable: true, get: function () { return GitNexusBridge_js_1.GitNexusBridge; } });
-var RLMNavigatorBridge_js_1 = require("./RLMNavigatorBridge.js");
-Object.defineProperty(exports, "RLMNavigatorBridge", { enumerable: true, get: function () { return RLMNavigatorBridge_js_1.RLMNavigatorBridge; } });
-var ClaudeCodeBridge_js_1 = require("./ClaudeCodeBridge.js");
-Object.defineProperty(exports, "ClaudeCodeBridge", { enumerable: true, get: function () { return ClaudeCodeBridge_js_1.ClaudeCodeBridge; } });
+// Import all bridge implementations first
+const BaseBridge_1 = require("./base/BaseBridge");
+Object.defineProperty(exports, "BaseBridge", { enumerable: true, get: function () { return BaseBridge_1.BaseBridge; } });
+const DossierBridge_1 = require("./DossierBridge");
+Object.defineProperty(exports, "DossierBridge", { enumerable: true, get: function () { return DossierBridge_1.DossierBridge; } });
+const RufloBridge_1 = require("./RufloBridge");
+Object.defineProperty(exports, "RufloBridge", { enumerable: true, get: function () { return RufloBridge_1.RufloBridge; } });
+const ADWSkillsBridge_1 = require("./ADWSkillsBridge");
+Object.defineProperty(exports, "ADWSkillsBridge", { enumerable: true, get: function () { return ADWSkillsBridge_1.ADWSkillsBridge; } });
+const GitNexusBridge_1 = require("./GitNexusBridge");
+Object.defineProperty(exports, "GitNexusBridge", { enumerable: true, get: function () { return GitNexusBridge_1.GitNexusBridge; } });
+const RLMNavigatorBridge_1 = require("./RLMNavigatorBridge");
+Object.defineProperty(exports, "RLMNavigatorBridge", { enumerable: true, get: function () { return RLMNavigatorBridge_1.RLMNavigatorBridge; } });
+const ClaudeCodeBridge_1 = require("./ClaudeCodeBridge");
+Object.defineProperty(exports, "ClaudeCodeBridge", { enumerable: true, get: function () { return ClaudeCodeBridge_1.ClaudeCodeBridge; } });
 // Type definitions
-__exportStar(require("./types/common.js"), exports);
+__exportStar(require("./types/common"), exports);
 // Event system
-__exportStar(require("./events/EventTypes.js"), exports);
+__exportStar(require("./events/EventTypes"), exports);
 // Error handling
-__exportStar(require("./errors/ErrorHandling.js"), exports);
+__exportStar(require("./errors/ErrorHandling"), exports);
 // Utility functions and helpers
 class BridgeUtils {
     /**
@@ -89,22 +89,22 @@ class BridgeUtils {
 exports.BridgeUtils = BridgeUtils;
 class DefaultBridgeFactory {
     createDossierBridge(config) {
-        return new DossierBridge(config);
+        return new DossierBridge_1.DossierBridge(config);
     }
     createRufloBridge(config) {
-        return new RufloBridge(config);
+        return new RufloBridge_1.RufloBridge(config);
     }
     createADWSkillsBridge(config) {
-        return new ADWSkillsBridge(config);
+        return new ADWSkillsBridge_1.ADWSkillsBridge(config);
     }
     createGitNexusBridge(config) {
-        return new GitNexusBridge(config);
+        return new GitNexusBridge_1.GitNexusBridge(config);
     }
     createRLMNavigatorBridge(config) {
-        return new RLMNavigatorBridge(config);
+        return new RLMNavigatorBridge_1.RLMNavigatorBridge(config);
     }
     createClaudeCodeBridge(config) {
-        return new ClaudeCodeBridge(config);
+        return new ClaudeCodeBridge_1.ClaudeCodeBridge(config);
     }
 }
 exports.DefaultBridgeFactory = DefaultBridgeFactory;

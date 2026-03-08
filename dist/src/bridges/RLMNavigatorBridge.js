@@ -40,7 +40,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RLMNavigatorBridge = void 0;
 const BaseBridge_js_1 = require("./base/BaseBridge.js");
 class RLMNavigatorBridge extends BaseBridge_js_1.BaseBridge {
-    config;
     activeSessions = new Map();
     astCache = new Map();
     analysisCache = new Map();

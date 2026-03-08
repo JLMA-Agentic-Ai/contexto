@@ -2,22 +2,23 @@
  * Bridge Integration System Entry Point
  * Exports all bridges, types, and utilities for integration use
  */
-export { BaseBridge } from './base/BaseBridge.js';
-export { DossierBridge } from './DossierBridge.js';
-export { RufloBridge } from './RufloBridge.js';
-export { ADWSkillsBridge } from './ADWSkillsBridge.js';
-export { GitNexusBridge } from './GitNexusBridge.js';
-export { RLMNavigatorBridge } from './RLMNavigatorBridge.js';
-export { ClaudeCodeBridge } from './ClaudeCodeBridge.js';
-export * from './types/common.js';
-export * from './events/EventTypes.js';
-export * from './errors/ErrorHandling.js';
-export type { DossierConfig, DossierTask, DossierWorkflow, DossierWorkflowStep, UIComponentState, OrchestrationEvent } from './DossierBridge.js';
-export type { RufloConfig, RufloAgent, RufloTask, SwarmConfiguration, SwarmState, RufloMemoryItem, TaskExecutionEvent } from './RufloBridge.js';
-export type { ADWConfig, ADWInvestigation, ADWHypothesis, ADWTest, ADWSkill, ADWSkillParameter, ADWSkillOutput, ADWTimelineEvent, ADWWorkflowTemplate, ADWWorkflowStep, InvestigationEvent } from './ADWSkillsBridge.js';
-export type { GitNexusConfig, GitRepository, CodeSymbol, CodeRelationship, ExecutionFlow, ExecutionStep, GraphQuery, GraphQueryResult, ImpactAnalysis, CodeInsight, IndexingEvent } from './GitNexusBridge.js';
-export type { RLMNavigatorConfig, ASTNode, NodeReference, NavigationSession, NavigationStep, NavigationBookmark, NavigationFilter, SemanticQuery, SemanticResult, ControlFlowGraph, CFGNode, CFGEdge, DataFlowAnalysis, VariableFlow, DataDependency, DefUseChain, LiveVariable, NavigationEvent } from './RLMNavigatorBridge.js';
-export type { ClaudeCodeConfig, ExecutionContext, ExecutionPermissions, ExecutionResources, ExecutionConstraints, CodeExecution, ExecutionResult, ExecutionArtifact, ExecutionMetrics, Agent, AgentCapability, CapabilityParameter, CapabilityOutput, AgentPerformance, TaskCoordination, CoordinatedTask, TaskDependency, TaskResult, ToolInvocation, ClaudeCodeEvent } from './ClaudeCodeBridge.js';
+import { BaseBridge } from './base/BaseBridge';
+import { DossierBridge } from './DossierBridge';
+import { RufloBridge } from './RufloBridge';
+import { ADWSkillsBridge } from './ADWSkillsBridge';
+import { GitNexusBridge } from './GitNexusBridge';
+import { RLMNavigatorBridge } from './RLMNavigatorBridge';
+import { ClaudeCodeBridge } from './ClaudeCodeBridge';
+export { BaseBridge, DossierBridge, RufloBridge, ADWSkillsBridge, GitNexusBridge, RLMNavigatorBridge, ClaudeCodeBridge };
+export * from './types/common';
+export * from './events/EventTypes';
+export * from './errors/ErrorHandling';
+export type { DossierConfig, DossierTask, DossierWorkflow, DossierWorkflowStep, UIComponentState, OrchestrationEvent } from './DossierBridge';
+export type { RufloConfig, RufloAgent, RufloTask, SwarmConfiguration, SwarmState, RufloMemoryItem, TaskExecutionEvent } from './RufloBridge';
+export type { ADWConfig, ADWInvestigation, ADWHypothesis, ADWTest, ADWSkill, ADWSkillParameter, ADWSkillOutput, ADWTimelineEvent, ADWWorkflowTemplate, ADWWorkflowStep, InvestigationEvent } from './ADWSkillsBridge';
+export type { GitNexusConfig, GitRepository, CodeSymbol, CodeRelationship, ExecutionFlow, ExecutionStep, GraphQuery, GraphQueryResult, ImpactAnalysis, CodeInsight, IndexingEvent } from './GitNexusBridge';
+export type { RLMNavigatorConfig, ASTNode, NodeReference, NavigationSession, NavigationStep, NavigationBookmark, NavigationFilter, SemanticQuery, SemanticResult, ControlFlowGraph, CFGNode, CFGEdge, DataFlowAnalysis, VariableFlow, DataDependency, DefUseChain, LiveVariable, NavigationEvent } from './RLMNavigatorBridge';
+export type { ClaudeCodeConfig, ExecutionContext, ExecutionPermissions, ExecutionResources, ExecutionConstraints, CodeExecution, ExecutionResult, ExecutionArtifact, ExecutionMetrics, Agent, AgentCapability, CapabilityParameter, CapabilityOutput, AgentPerformance, TaskCoordination, CoordinatedTask, TaskDependency, TaskResult, ToolInvocation, ClaudeCodeEvent } from './ClaudeCodeBridge';
 export interface BridgeFactory {
     createDossierBridge(config: any): DossierBridge;
     createRufloBridge(config: any): RufloBridge;
@@ -119,7 +120,12 @@ export declare class BridgeUtils {
      */
     static generateEventFingerprint(event: any): string;
 }
-import type { DossierConfig, RufloConfig, ADWConfig, GitNexusConfig, RLMNavigatorConfig, ClaudeCodeConfig } from './index.js';
+import type { DossierConfig } from './DossierBridge';
+import type { RufloConfig } from './RufloBridge';
+import type { ADWConfig } from './ADWSkillsBridge';
+import type { GitNexusConfig } from './GitNexusBridge';
+import type { RLMNavigatorConfig } from './RLMNavigatorBridge';
+import type { ClaudeCodeConfig } from './ClaudeCodeBridge';
 export declare class DefaultBridgeFactory implements BridgeFactory {
     createDossierBridge(config: DossierConfig): DossierBridge;
     createRufloBridge(config: RufloConfig): RufloBridge;

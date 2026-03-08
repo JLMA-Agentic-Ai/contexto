@@ -91,7 +91,7 @@ export interface OrchestrationEvent extends BridgeEvent {
 }
 
 export class DossierBridge extends BaseBridge {
-  protected config: DossierConfig;
+  protected declare config: DossierConfig;
   private webSocket?: WebSocket;
   private uiStates: Map<string, UIComponentState> = new Map();
   private activeTasks: Map<string, DossierTask> = new Map();

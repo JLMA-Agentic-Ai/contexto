@@ -7,7 +7,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ADWSkillsBridge = void 0;
 const BaseBridge_js_1 = require("./base/BaseBridge.js");
 class ADWSkillsBridge extends BaseBridge_js_1.BaseBridge {
-    config;
     activeInvestigations = new Map();
     skillRegistry = new Map();
     workflowTemplates = new Map();

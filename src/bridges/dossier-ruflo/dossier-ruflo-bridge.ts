@@ -4,7 +4,7 @@
  */
 
 import { ComponentBridge, ComponentMessage, HealthMetrics, ComponentCapability } from '../base/component-bridge';
-import { WebSocket } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 import { EventEmitter } from 'events';
 
 export interface DossierState {
@@ -84,7 +84,7 @@ export interface RufloResponse {
 }
 
 export class DossierRufloBridge extends ComponentBridge {
-  private wsServer?: WebSocket.Server;
+  private wsServer?: WebSocketServer;
   private connectedClients: Set<WebSocket> = new Set();
   private eventEmitter: EventEmitter = new EventEmitter();
   private dossierState: DossierState;

@@ -3,23 +3,26 @@
  * Exports all bridges, types, and utilities for integration use
  */
 
-// Core bridge implementations
-export { BaseBridge } from './base/BaseBridge.js';
-export { DossierBridge } from './DossierBridge.js';
-export { RufloBridge } from './RufloBridge.js';
-export { ADWSkillsBridge } from './ADWSkillsBridge.js';
-export { GitNexusBridge } from './GitNexusBridge.js';
-export { RLMNavigatorBridge } from './RLMNavigatorBridge.js';
-export { ClaudeCodeBridge } from './ClaudeCodeBridge.js';
+// Import all bridge implementations first
+import { BaseBridge } from './base/BaseBridge';
+import { DossierBridge } from './DossierBridge';
+import { RufloBridge } from './RufloBridge';
+import { ADWSkillsBridge } from './ADWSkillsBridge';
+import { GitNexusBridge } from './GitNexusBridge';
+import { RLMNavigatorBridge } from './RLMNavigatorBridge';
+import { ClaudeCodeBridge } from './ClaudeCodeBridge';
+
+// Re-export bridge implementations
+export { BaseBridge, DossierBridge, RufloBridge, ADWSkillsBridge, GitNexusBridge, RLMNavigatorBridge, ClaudeCodeBridge };
 
 // Type definitions
-export * from './types/common.js';
+export * from './types/common';
 
 // Event system
-export * from './events/EventTypes.js';
+export * from './events/EventTypes';
 
 // Error handling
-export * from './errors/ErrorHandling.js';
+export * from './errors/ErrorHandling';
 
 // Bridge configuration interfaces
 export type {
@@ -29,7 +32,7 @@ export type {
   DossierWorkflowStep,
   UIComponentState,
   OrchestrationEvent
-} from './DossierBridge.js';
+} from './DossierBridge';
 
 export type {
   RufloConfig,
@@ -39,7 +42,7 @@ export type {
   SwarmState,
   RufloMemoryItem,
   TaskExecutionEvent
-} from './RufloBridge.js';
+} from './RufloBridge';
 
 export type {
   ADWConfig,
@@ -53,7 +56,7 @@ export type {
   ADWWorkflowTemplate,
   ADWWorkflowStep,
   InvestigationEvent
-} from './ADWSkillsBridge.js';
+} from './ADWSkillsBridge';
 
 export type {
   GitNexusConfig,
@@ -67,7 +70,7 @@ export type {
   ImpactAnalysis,
   CodeInsight,
   IndexingEvent
-} from './GitNexusBridge.js';
+} from './GitNexusBridge';
 
 export type {
   RLMNavigatorConfig,
@@ -88,7 +91,7 @@ export type {
   DefUseChain,
   LiveVariable,
   NavigationEvent
-} from './RLMNavigatorBridge.js';
+} from './RLMNavigatorBridge';
 
 export type {
   ClaudeCodeConfig,
@@ -111,7 +114,7 @@ export type {
   TaskResult,
   ToolInvocation,
   ClaudeCodeEvent
-} from './ClaudeCodeBridge.js';
+} from './ClaudeCodeBridge';
 
 // Bridge factory and registry
 export interface BridgeFactory {
@@ -250,14 +253,12 @@ export class BridgeUtils {
 }
 
 // Default implementations and factories
-import type {
-  DossierConfig,
-  RufloConfig,
-  ADWConfig,
-  GitNexusConfig,
-  RLMNavigatorConfig,
-  ClaudeCodeConfig
-} from './index.js';
+import type { DossierConfig } from './DossierBridge';
+import type { RufloConfig } from './RufloBridge';
+import type { ADWConfig } from './ADWSkillsBridge';
+import type { GitNexusConfig } from './GitNexusBridge';
+import type { RLMNavigatorConfig } from './RLMNavigatorBridge';
+import type { ClaudeCodeConfig } from './ClaudeCodeBridge';
 
 export class DefaultBridgeFactory implements BridgeFactory {
   createDossierBridge(config: DossierConfig): DossierBridge {

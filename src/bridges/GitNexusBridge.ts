@@ -167,7 +167,7 @@ export interface IndexingEvent extends BridgeEvent {
 }
 
 export class GitNexusBridge extends BaseBridge {
-  protected config: GitNexusConfig;
+  protected declare config: GitNexusConfig;
   private repositories: Map<string, GitRepository> = new Map();
   private indexingProgress: Map<string, number> = new Map();
   private queryCache: Map<string, { result: GraphQueryResult; timestamp: Date }> = new Map();

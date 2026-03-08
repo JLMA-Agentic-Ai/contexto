@@ -40,7 +40,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GitNexusBridge = void 0;
 const BaseBridge_js_1 = require("./base/BaseBridge.js");
 class GitNexusBridge extends BaseBridge_js_1.BaseBridge {
-    config;
     repositories = new Map();
     indexingProgress = new Map();
     queryCache = new Map();

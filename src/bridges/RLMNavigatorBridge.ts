@@ -212,7 +212,7 @@ export interface NavigationEvent extends BridgeEvent {
 }
 
 export class RLMNavigatorBridge extends BaseBridge {
-  protected config: RLMNavigatorConfig;
+  protected declare config: RLMNavigatorConfig;
   private activeSessions: Map<string, NavigationSession> = new Map();
   private astCache: Map<string, { ast: ASTNode; timestamp: Date }> = new Map();
   private analysisCache: Map<string, { result: any; timestamp: Date }> = new Map();
