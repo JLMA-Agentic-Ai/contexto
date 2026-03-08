@@ -1,0 +1,187 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for Visión Maestra Platform
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request", "platform"]
+assignees:
+  - vision-maestra-team
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ Feature Request - Visión Maestra Platform
+
+        Thank you for suggesting a new feature! Please provide detailed information about your proposed enhancement.
+
+        **Platform Components**: Dossier, Ruflo V3, GitNexus, ADW Skills, RLM Navigator, Claude Code
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 🎯 Feature Summary
+      description: A clear and concise description of the feature request
+      placeholder: "I would like the platform to..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 🧩 Target Component
+      description: Which component would this feature primarily enhance?
+      options:
+        - "Dossier (Frontend + Project Manager)"
+        - "Ruflo V3 (CLI Orchestrator)"
+        - "GitNexus (Code Graph Analysis)"
+        - "ADW Skills (Methodology)"
+        - "RLM Navigator (AST Navigation)"
+        - "Claude Code (Execution Engine)"
+        - "Platform Integration"
+        - "Real-time Streaming"
+        - "Security System"
+        - "Cross-Component Enhancement"
+        - "New Component Proposal"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚀 Priority Level
+      description: How important is this feature to your workflow?
+      options:
+        - "Critical - Blocks current work"
+        - "High - Significantly improves workflow"
+        - "Medium - Nice to have improvement"
+        - "Low - Minor enhancement"
+        - "Future - Long-term consideration"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: ❓ Problem Statement
+      description: What problem does this feature solve? What is the current limitation?
+      placeholder: "Currently, when I try to... the platform doesn't..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe your proposed solution in detail
+      placeholder: "I suggest implementing..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternative Solutions
+      description: Have you considered alternative solutions or workarounds?
+      placeholder: "Other approaches could include..."
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: 🎯 Use Cases
+      description: Describe specific use cases where this feature would be beneficial
+      placeholder: |
+        1. As a developer, I want to...
+        2. As a project manager, I need to...
+        3. When working with large codebases...
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: ✅ Acceptance Criteria
+      description: How will we know when this feature is successfully implemented?
+      placeholder: |
+        - [ ] The feature should...
+        - [ ] Users should be able to...
+        - [ ] Performance should...
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: 🎨 Mockups or Examples
+      description: Include any mockups, wireframes, or examples from other tools
+      placeholder: |
+        - Screenshots or mockups
+        - Examples from similar tools
+        - API specifications
+        - User interface concepts
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: 🛠️ Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - "Simple - Small change or enhancement"
+        - "Medium - Moderate development effort"
+        - "Complex - Significant development effort"
+        - "Major - Large-scale architectural change"
+        - "Unknown - Need technical analysis"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: 📊 Impact Areas
+      description: Which areas would this feature impact? (Select all that apply)
+      options:
+        - label: User Experience (UX)
+        - label: Developer Experience (DX)
+        - label: Performance
+        - label: Security
+        - label: Scalability
+        - label: Reliability
+        - label: Maintainability
+        - label: Integration Capabilities
+        - label: Real-time Features
+        - label: Automation/AI
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context
+      description: Add any other context, research, or relevant information
+      placeholder: |
+        - Research findings
+        - Industry standards
+        - Related GitHub issues or PRs
+        - Community feedback
+        - Business impact
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I have provided a clear problem statement
+          required: true
+        - label: I have described a specific solution
+          required: true
+        - label: I have identified the target component
+          required: true
+        - label: I have considered alternative approaches
+          required: false
+        - label: I have outlined acceptance criteria
+          required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        **🤖 Auto-generated by ADW Deploy Solution - Enterprise Feature Template**
+
+        The Visión Maestra team will review your feature request and provide feedback.
+
+        For feature discussions, visit: https://github.com/vision-maestra/platform/discussions

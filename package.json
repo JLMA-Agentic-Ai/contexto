@@ -18,6 +18,11 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
     "type-check": "tsc --noEmit",
+    "adw:deploy": "node scripts/adw-deploy.js",
+    "adw:setup": "node scripts/adw-setup.js",
+    "adw:health-check": "node scripts/adw-health-check.js",
+    "adw:registry:publish": "npm publish --access public",
+    "adw:security-scan": "npm audit && npx semgrep --config=auto .",
     "health-check": "curl -f http://localhost:8080/api/health || exit 1",
     "status": "node -e \"fetch('http://localhost:8080/api/health').then(r=>r.json()).then(console.log).catch(()=>console.log('Platform not running'))\"",
     "logs": "tail -f logs/platform.log",
@@ -188,6 +193,57 @@
       "configPath": "./config/platform/platform-config.ts",
       "logLevel": "info",
       "environment": "development"
+    }
+  },
+  "adw": {
+    "framework": "deployment",
+    "version": "1.0.0",
+    "complexity": "enterprise",
+    "language": "typescript",
+    "ecosystem": "npm",
+    "configuredAt": "2026-03-08T09:30:00Z",
+    "projectType": "multi-component-platform",
+    "components": {
+      "count": 6,
+      "names": ["dossier", "ruflo-v3", "git-nexus", "adw-skills", "rlm-navigator", "claude-code"]
+    },
+    "requirements": {
+      "realTimeStreaming": true,
+      "latencyTarget": "<100ms",
+      "enterpriseSecurity": true,
+      "multiEnvironment": true
+    },
+    "deployment": {
+      "strategy": "blue-green",
+      "environments": ["dev", "test", "staging", "production"],
+      "containerization": true,
+      "orchestration": "docker-compose",
+      "monitoring": "comprehensive"
+    },
+    "typescript": {
+      "versions": ["5.2+"],
+      "target": "ES2022",
+      "strict": true,
+      "declaration": true
+    },
+    "security": {
+      "audit": true,
+      "codeql": true,
+      "semgrep": true,
+      "containerScan": true,
+      "dependencyCheck": true
+    },
+    "performance": {
+      "buildOptimization": true,
+      "runtimeOptimization": true,
+      "memoryManagement": true,
+      "streamingLatency": "<100ms"
+    },
+    "quality": {
+      "adwGates": "all-7-gates",
+      "truthScoring": ">=0.95",
+      "evidenceTracking": true,
+      "complianceAudit": true
     }
   }
 }

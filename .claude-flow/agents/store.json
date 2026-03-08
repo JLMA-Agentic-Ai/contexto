@@ -524,6 +524,136 @@
       "domain": "process-integrity",
       "model": "sonnet",
       "modelRoutedBy": "explicit"
+    },
+    "infrastructure-synthesizer": {
+      "agentId": "infrastructure-synthesizer",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:20:59.976Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "container-expert": {
+      "agentId": "container-expert",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:01.451Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "realtime-expert": {
+      "agentId": "realtime-expert",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:02.857Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "security-expert": {
+      "agentId": "security-expert",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:04.274Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "monitoring-expert": {
+      "agentId": "monitoring-expert",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:05.766Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "cicd-expert": {
+      "agentId": "cicd-expert",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:07.098Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "database-expert": {
+      "agentId": "database-expert",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:08.046Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "iac-expert": {
+      "agentId": "iac-expert",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:09.517Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "risk-assessor": {
+      "agentId": "risk-assessor",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:10.933Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
+    },
+    "contrarian-analyst": {
+      "agentId": "contrarian-analyst",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "sonnet"
+      },
+      "createdAt": "2026-03-08T09:21:12.350Z",
+      "model": "sonnet",
+      "modelRoutedBy": "explicit"
     }
   },
   "version": "3.0.0"
