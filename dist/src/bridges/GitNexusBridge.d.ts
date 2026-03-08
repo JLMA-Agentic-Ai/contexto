@@ -16,6 +16,7 @@ export interface GitNexusConfig extends BaseBridgeConfig {
         indexInterval: number;
         parallelWorkers: number;
         supportedLanguages: string[];
+        debounceDelay: number;
     };
     analysis: {
         maxDepth: number;

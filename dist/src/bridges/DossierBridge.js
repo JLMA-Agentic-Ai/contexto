@@ -113,7 +113,7 @@ class DossierBridge extends BaseBridge_js_1.BaseBridge {
     async disconnect() {
         if (this.webSocket) {
             this.webSocket.close();
-            this.webSocket = undefined;
+            delete this.webSocket;
         }
         // TODO: Cleanup orchestration connections
         this.emit('disconnected');
@@ -254,7 +254,11 @@ class DossierBridge extends BaseBridge_js_1.BaseBridge {
                 type: 'workflow.execution.started',
                 source: 'dossier-bridge',
                 timestamp: new Date(),
-                data: { workflowId, executionId, variables }
+                data: {
+                    workflowId,
+                    executionId,
+                    ...(variables && { variables })
+                }
             });
             return executionId;
         });

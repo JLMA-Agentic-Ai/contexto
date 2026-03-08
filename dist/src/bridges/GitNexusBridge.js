@@ -450,7 +450,7 @@ class GitNexusBridge extends BaseBridge_js_1.BaseBridge {
         try {
             // Extract repository data from database row
             // This would depend on the actual Kùzu row format
-            return {
+            const gitRepo = {
                 id: row.id,
                 name: row.name,
                 path: row.path,
@@ -459,9 +459,12 @@ class GitNexusBridge extends BaseBridge_js_1.BaseBridge {
                 indexStatus: row.indexStatus || 'pending',
                 symbolCount: row.symbolCount || 0,
                 relationshipCount: row.relationshipCount || 0,
-                executionFlowCount: row.executionFlowCount || 0,
-                lastIndexed: row.lastIndexed ? new Date(row.lastIndexed) : undefined
+                executionFlowCount: row.executionFlowCount || 0
             };
+            if (row.lastIndexed) {
+                gitRepo.lastIndexed = new Date(row.lastIndexed);
+            }
+            return gitRepo;
         }
         catch (error) {
             console.error('Failed to parse repository from row:', error);

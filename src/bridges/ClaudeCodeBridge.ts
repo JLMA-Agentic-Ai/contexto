@@ -268,7 +268,7 @@ export interface ClaudeCodeEvent extends BridgeEvent {
     executionId?: string;
     agentId?: string;
     taskId?: string;
-    action: 'execution_started' | 'execution_completed' | 'agent_spawned' | 'task_assigned' | 'coordination_completed';
+    action: 'execution_started' | 'execution_completed' | 'agent_spawned' | 'agent_terminated' | 'task_assigned' | 'coordination_completed';
     details: any;
   };
 }
@@ -693,7 +693,15 @@ export class ClaudeCodeBridge extends BaseBridge {
         };
       }
 
-      const data = await response.json();
+      const data = await response.json() as {
+        success: boolean;
+        exitCode?: number;
+        stdout?: string;
+        stderr?: string;
+        output?: any;
+        error?: string;
+        warnings?: string[];
+      };
 
       return {
         success: true,

@@ -24,6 +24,7 @@ export interface GitNexusConfig extends BaseBridgeConfig {
     indexInterval: number;
     parallelWorkers: number;
     supportedLanguages: string[];
+    debounceDelay: number;
   };
   analysis: {
     maxDepth: number;
@@ -645,7 +646,7 @@ export class GitNexusBridge extends BaseBridge {
     try {
       // Extract repository data from database row
       // This would depend on the actual Kùzu row format
-      return {
+      const gitRepo: GitRepository = {
         id: row.id,
         name: row.name,
         path: row.path,
@@ -654,9 +655,14 @@ export class GitNexusBridge extends BaseBridge {
         indexStatus: row.indexStatus || 'pending',
         symbolCount: row.symbolCount || 0,
         relationshipCount: row.relationshipCount || 0,
-        executionFlowCount: row.executionFlowCount || 0,
-        lastIndexed: row.lastIndexed ? new Date(row.lastIndexed) : undefined
+        executionFlowCount: row.executionFlowCount || 0
       };
+
+      if (row.lastIndexed) {
+        gitRepo.lastIndexed = new Date(row.lastIndexed);
+      }
+
+      return gitRepo;
     } catch (error) {
       console.error('Failed to parse repository from row:', error);
       return null;

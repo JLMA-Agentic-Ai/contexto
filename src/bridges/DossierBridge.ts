@@ -212,7 +212,7 @@ export class DossierBridge extends BaseBridge {
   public async disconnect(): Promise<void> {
     if (this.webSocket) {
       this.webSocket.close();
-      this.webSocket = undefined;
+      delete (this as any).webSocket;
     }
 
     // TODO: Cleanup orchestration connections
@@ -384,7 +384,11 @@ export class DossierBridge extends BaseBridge {
         type: 'workflow.execution.started',
         source: 'dossier-bridge',
         timestamp: new Date(),
-        data: { workflowId, executionId, variables }
+        data: {
+          workflowId,
+          executionId,
+          ...(variables && { variables })
+        }
       });
 
       return executionId;

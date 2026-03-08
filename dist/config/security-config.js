@@ -88,7 +88,7 @@ exports.enterpriseSecurityPolicy = {
         },
         monitoring: {
             logLevel: 'warn', // Enterprise logging
-            alertWebhook: process.env.SECURITY_WEBHOOK_URL || undefined
+            ...(process.env.SECURITY_WEBHOOK_URL && { alertWebhook: process.env.SECURITY_WEBHOOK_URL })
         }
     }
 };

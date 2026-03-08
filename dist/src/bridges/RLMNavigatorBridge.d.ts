@@ -201,7 +201,7 @@ export interface LiveVariable {
 export interface NavigationEvent extends BridgeEvent {
     data: {
         sessionId: string;
-        action: 'session_created' | 'navigation_step' | 'bookmark_added' | 'analysis_completed';
+        action: 'session_created' | 'session_closed' | 'navigation_step' | 'bookmark_added' | 'analysis_completed';
         details: any;
     };
 }

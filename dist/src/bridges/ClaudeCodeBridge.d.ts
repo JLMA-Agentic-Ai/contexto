@@ -241,7 +241,7 @@ export interface ClaudeCodeEvent extends BridgeEvent {
         executionId?: string;
         agentId?: string;
         taskId?: string;
-        action: 'execution_started' | 'execution_completed' | 'agent_spawned' | 'task_assigned' | 'coordination_completed';
+        action: 'execution_started' | 'execution_completed' | 'agent_spawned' | 'agent_terminated' | 'task_assigned' | 'coordination_completed';
         details: any;
     };
 }
