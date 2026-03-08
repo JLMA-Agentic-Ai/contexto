@@ -67,8 +67,10 @@ export interface SecurityEvent {
     originalIp?: string;
     requestIp?: string;
     requestCount?: number;
+    maxAllowed?: number;
     indicators?: any;
     recentFailures?: any;
+    securityFailures?: number;
     timestamp: Date;
 }
 export interface OperationEvent {

@@ -49,6 +49,8 @@ export interface EvidenceTracker {
   decisions: EvidenceDecision[];
   investigations: Investigation[];
   confidenceScore: number;
+  addDecision(decision: string, evidence: EvidenceDecision): void;
+  addInvestigation(investigation: Investigation): void;
 }
 
 /**
@@ -132,11 +134,7 @@ export class VisualMaestraOrchestrator extends EventEmitter {
       status: 'pending',
       progress: 0,
       currentPhase: 'initialization',
-      evidence: {
-        decisions: [],
-        investigations: [],
-        confidenceScore: 0
-      },
+      evidence: new EvidenceTrackerImpl(),
       artifacts: []
     };
 

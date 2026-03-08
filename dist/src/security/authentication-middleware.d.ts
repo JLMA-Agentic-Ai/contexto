@@ -10,6 +10,7 @@
  * - Rate limiting per user/IP
  */
 import { Request, Response, NextFunction } from 'express';
+import { EventEmitter } from 'events';
 import { SecurityAuditLogger } from './audit-logger';
 export interface AuthenticationContext {
     userId: string;
@@ -46,7 +47,7 @@ export interface AuthenticationError {
     ipAddress?: string;
     userId?: string;
 }
-export declare class AuthenticationMiddleware {
+export declare class AuthenticationMiddleware extends EventEmitter {
     private auditLogger;
     private activeSessions;
     private failedAttempts;

@@ -7,7 +7,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { WebSocketServer, WebSocket } from 'ws';
+import { WebSocketServer, WebSocket, RawData } from 'ws';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { SecurityBridgeManager, SecurityContext } from '../bridges/security/security-bridge-manager';
 
@@ -342,9 +342,21 @@ export class RealTimeCoordinator extends EventEmitter {
   /**
    * Handle incoming WebSocket message
    */
-  private async handleWebSocketMessage(connectionId: string, data: Buffer): Promise<void> {
+  private async handleWebSocketMessage(connectionId: string, data: RawData): Promise<void> {
     try {
-      const message = JSON.parse(data.toString());
+      // Convert data to string regardless of type
+      let dataString: string;
+      if (Buffer.isBuffer(data)) {
+        dataString = data.toString();
+      } else if (data instanceof ArrayBuffer) {
+        dataString = Buffer.from(data).toString();
+      } else if (Array.isArray(data)) {
+        dataString = Buffer.concat(data).toString();
+      } else {
+        dataString = Buffer.from(data as ArrayBuffer).toString();
+      }
+
+      const message = JSON.parse(dataString);
       const connection = this.connections.get(connectionId);
 
       if (!connection) return;

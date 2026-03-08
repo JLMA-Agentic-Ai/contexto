@@ -244,6 +244,11 @@ export interface StreamingConfig {
             ttl: number;
         };
     };
+    security: {
+        authentication: boolean;
+        authorization: boolean;
+        encryption: boolean;
+    };
 }
 export interface OrchestrationConfig {
     maxConcurrentExecutions: number;

@@ -257,6 +257,11 @@ export interface StreamingConfig {
       ttl: number;
     };
   };
+  security: {
+    authentication: boolean;
+    authorization: boolean;
+    encryption: boolean;
+  };
 }
 
 export interface OrchestrationConfig {
@@ -678,6 +683,11 @@ export class PlatformConfig {
             maxMessages: 1000,
             ttl: 3600000 // 1 hour
           }
+        },
+        security: {
+          authentication: true,
+          authorization: true,
+          encryption: true
         }
       },
       orchestration: {

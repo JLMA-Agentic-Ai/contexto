@@ -41,6 +41,8 @@ export interface EvidenceTracker {
     decisions: EvidenceDecision[];
     investigations: Investigation[];
     confidenceScore: number;
+    addDecision(decision: string, evidence: EvidenceDecision): void;
+    addInvestigation(investigation: Investigation): void;
 }
 /**
  * Evidence Tracker Implementation

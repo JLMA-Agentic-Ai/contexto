@@ -13,6 +13,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verify, sign, JsonWebTokenError } from 'jsonwebtoken';
 import { createHash, randomBytes } from 'crypto';
+import { EventEmitter } from 'events';
 import { ComponentSecurityConfig, enterpriseSecurityPolicy } from '../../config/security-config';
 import { SecurityAuditLogger } from './audit-logger';
 
@@ -54,7 +55,7 @@ export interface AuthenticationError {
   userId?: string;
 }
 
-export class AuthenticationMiddleware {
+export class AuthenticationMiddleware extends EventEmitter {
   private auditLogger: SecurityAuditLogger;
   private activeSessions: Map<string, AuthenticationContext> = new Map();
   private failedAttempts: Map<string, number[]> = new Map();
@@ -65,6 +66,7 @@ export class AuthenticationMiddleware {
   private readonly refreshSecret = process.env.REFRESH_SECRET || this.generateSecureKey();
 
   constructor(auditLogger: SecurityAuditLogger) {
+    super();
     this.auditLogger = auditLogger;
     this.setupCleanupInterval();
   }

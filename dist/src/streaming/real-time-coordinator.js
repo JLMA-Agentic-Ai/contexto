@@ -266,7 +266,21 @@ class RealTimeCoordinator extends events_1.EventEmitter {
      */
     async handleWebSocketMessage(connectionId, data) {
         try {
-            const message = JSON.parse(data.toString());
+            // Convert data to string regardless of type
+            let dataString;
+            if (Buffer.isBuffer(data)) {
+                dataString = data.toString();
+            }
+            else if (data instanceof ArrayBuffer) {
+                dataString = Buffer.from(data).toString();
+            }
+            else if (Array.isArray(data)) {
+                dataString = Buffer.concat(data).toString();
+            }
+            else {
+                dataString = Buffer.from(data).toString();
+            }
+            const message = JSON.parse(dataString);
             const connection = this.connections.get(connectionId);
             if (!connection)
                 return;

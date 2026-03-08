@@ -162,7 +162,7 @@ export class PlatformOrchestrator extends EventEmitter {
   private startHealthMonitoring(): void {
     this.healthCheckInterval = setInterval(() => {
       this.performHealthCheck();
-    }, this.config.monitoring.healthCheckInterval);
+    }, this.config.monitoring.healthChecks.interval);
   }
 
   private async performHealthCheck(): Promise<void> {

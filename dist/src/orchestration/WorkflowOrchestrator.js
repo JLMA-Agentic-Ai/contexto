@@ -69,11 +69,7 @@ class VisualMaestraOrchestrator extends events_1.EventEmitter {
             status: 'pending',
             progress: 0,
             currentPhase: 'initialization',
-            evidence: {
-                decisions: [],
-                investigations: [],
-                confidenceScore: 0
-            },
+            evidence: new EvidenceTrackerImpl(),
             artifacts: []
         };
         this.activeWorkflows.set(workflowId, workflow);

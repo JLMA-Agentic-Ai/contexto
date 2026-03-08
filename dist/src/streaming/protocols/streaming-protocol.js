@@ -190,6 +190,9 @@ class StreamingProtocol extends events_1.EventEmitter {
     }
     handleBroadcastMessage(sourceClientId, message) {
         const { channel, payload } = message;
+        if (!channel) {
+            return; // Cannot broadcast without channel
+        }
         // Find all subscriptions for this channel
         const channelSubscriptions = Array.from(this.subscriptions.values())
             .filter(sub => sub.channel === channel);

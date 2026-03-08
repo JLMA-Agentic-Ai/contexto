@@ -7,7 +7,7 @@
  */
 import { EventEmitter } from 'events';
 export type ComponentStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
-export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN' | 'ISOLATED';
 export interface HealthMetrics {
     componentId: string;
     status: ComponentStatus;

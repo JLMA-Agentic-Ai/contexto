@@ -307,6 +307,11 @@ class PlatformConfig {
                         maxMessages: 1000,
                         ttl: 3600000 // 1 hour
                     }
+                },
+                security: {
+                    authentication: true,
+                    authorization: true,
+                    encryption: true
                 }
             },
             orchestration: {

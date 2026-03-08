@@ -36,6 +36,7 @@ export interface StreamMessage {
   type: string;
   source: string;
   target?: string;
+  channel?: string;
   payload: any;
   timestamp: Date;
   priority: 'low' | 'normal' | 'high' | 'critical';
@@ -324,6 +325,10 @@ export class StreamingProtocol extends EventEmitter {
 
   private handleBroadcastMessage(sourceClientId: string, message: StreamMessage): void {
     const { channel, payload } = message;
+
+    if (!channel) {
+      return; // Cannot broadcast without channel
+    }
 
     // Find all subscriptions for this channel
     const channelSubscriptions = Array.from(this.subscriptions.values())

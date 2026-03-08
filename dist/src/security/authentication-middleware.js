@@ -14,8 +14,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthenticationMiddleware = void 0;
 const jsonwebtoken_1 = require("jsonwebtoken");
 const crypto_1 = require("crypto");
+const events_1 = require("events");
 const security_config_1 = require("../../config/security-config");
-class AuthenticationMiddleware {
+class AuthenticationMiddleware extends events_1.EventEmitter {
     auditLogger;
     activeSessions = new Map();
     failedAttempts = new Map();
@@ -24,6 +25,7 @@ class AuthenticationMiddleware {
     jwtSecret = process.env.JWT_SECRET || this.generateSecureKey();
     refreshSecret = process.env.REFRESH_SECRET || this.generateSecureKey();
     constructor(auditLogger) {
+        super();
         this.auditLogger = auditLogger;
         this.setupCleanupInterval();
     }

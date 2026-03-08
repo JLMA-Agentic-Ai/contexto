@@ -18,6 +18,7 @@ import { SecurityCircuitBreaker, CircuitBreakerConfig } from './circuit-breaker-
 import { SecurityAuditLogger, AuditLogConfig } from './audit-logger';
 import { SecretsManager } from './secrets-manager';
 import { NetworkSecurityManager } from './network-security';
+import { CircuitState as MonitoringCircuitState } from '../monitoring/health-circuit-breaker';
 import { enterpriseSecurityPolicy, componentSecurityConfigs, bridgeSecurityConfigs, auditConfig, secretsConfig, getSecurityConfig } from '../../config/security-config';
 
 export interface SecurityManagerConfig {
@@ -73,7 +74,7 @@ export interface SecurityStatus {
 
 export class SecurityManager extends EventEmitter {
   private auditLogger: SecurityAuditLogger;
-  private authMiddleware: AuthenticationMiddleware;
+  private authMiddleware: AuthenticationMiddleware | null = null;
   private inputValidation: InputValidationSchemas;
   private circuitBreakers: Map<string, SecurityCircuitBreaker> = new Map();
   private secretsManager: SecretsManager;
@@ -816,11 +817,11 @@ export class SecurityManager extends EventEmitter {
   private getCircuitBreakerOverallState(): 'closed' | 'half-open' | 'open' | 'isolated' {
     if (this.circuitBreakers.size === 0) return 'closed';
 
-    const states = Array.from(this.circuitBreakers.values()).map(cb => cb.getState());
+    const states = Array.from(this.circuitBreakers.values()).map(cb => cb.getState().toString());
 
-    if (states.includes('ISOLATED')) return 'isolated';
-    if (states.includes('OPEN')) return 'open';
-    if (states.includes('HALF_OPEN')) return 'half-open';
+    if (states.some(state => state === 'ISOLATED')) return 'isolated';
+    if (states.some(state => state === 'OPEN')) return 'open';
+    if (states.some(state => state === 'HALF_OPEN')) return 'half-open';
     return 'closed';
   }
 
@@ -828,7 +829,7 @@ export class SecurityManager extends EventEmitter {
     const states: Record<string, string> = {};
 
     for (const [bridgeId, circuitBreaker] of this.circuitBreakers.entries()) {
-      states[bridgeId] = circuitBreaker.getState();
+      states[bridgeId] = circuitBreaker.getState().toString();
     }
 
     return states;

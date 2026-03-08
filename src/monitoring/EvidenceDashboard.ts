@@ -225,9 +225,9 @@ export class EvidenceDashboard extends EventEmitter {
     if (decisions.length === 0) return 'INSUFFICIENT';
 
     const solidCount = decisions.filter(d => d.confidence >= EvidenceConfidence.SOLID).length;
-    const softCount = decisions.filter(d => d.evidence === 'SOFT').length;
-    const shakyCount = decisions.filter(d => d.evidence === 'SHAKY').length;
-    const unknownCount = decisions.filter(d => d.evidence === 'UNKNOWN').length;
+    const softCount = decisions.filter(d => d.evidence.includes('SOFT')).length;
+    const shakyCount = decisions.filter(d => d.evidence.includes('SHAKY')).length;
+    const unknownCount = decisions.filter(d => d.evidence.includes('UNKNOWN')).length;
 
     const solidRatio = solidCount / decisions.length;
     const problematicRatio = (shakyCount + unknownCount) / decisions.length;
@@ -295,7 +295,11 @@ export class EvidenceDashboard extends EventEmitter {
 
     // Update evidence distribution
     evidence.decisions.forEach(decision => {
-      this.metrics.evidenceDistribution[decision.evidence]++;
+      decision.evidence.forEach(evidenceType => {
+        if (evidenceType in this.metrics.evidenceDistribution) {
+          this.metrics.evidenceDistribution[evidenceType as keyof typeof this.metrics.evidenceDistribution]++;
+        }
+      });
     });
 
     // Update average confidence
@@ -369,7 +373,7 @@ export class EvidenceDashboard extends EventEmitter {
 
     // Investigation required alert
     const shakyOrUnknown = evidence.decisions.filter(d =>
-      d.evidence === 'SHAKY' || d.evidence === 'UNKNOWN'
+      d.evidence.includes('SHAKY') || d.evidence.includes('UNKNOWN')
     ).length;
 
     if (shakyOrUnknown > evidence.decisions.length * 0.3) {

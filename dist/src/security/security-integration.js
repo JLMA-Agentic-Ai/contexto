@@ -24,7 +24,7 @@ const security_config_1 = require("../../config/security-config");
 class SecurityManager extends events_1.EventEmitter {
     config;
     auditLogger;
-    authMiddleware;
+    authMiddleware = null;
     inputValidation;
     circuitBreakers = new Map();
     secretsManager;
@@ -645,19 +645,19 @@ class SecurityManager extends events_1.EventEmitter {
     getCircuitBreakerOverallState() {
         if (this.circuitBreakers.size === 0)
             return 'closed';
-        const states = Array.from(this.circuitBreakers.values()).map(cb => cb.getState());
-        if (states.includes('ISOLATED'))
+        const states = Array.from(this.circuitBreakers.values()).map(cb => cb.getState().toString());
+        if (states.some(state => state === 'ISOLATED'))
             return 'isolated';
-        if (states.includes('OPEN'))
+        if (states.some(state => state === 'OPEN'))
             return 'open';
-        if (states.includes('HALF_OPEN'))
+        if (states.some(state => state === 'HALF_OPEN'))
             return 'half-open';
         return 'closed';
     }
     getCircuitBreakerStates() {
         const states = {};
         for (const [bridgeId, circuitBreaker] of this.circuitBreakers.entries()) {
-            states[bridgeId] = circuitBreaker.getState();
+            states[bridgeId] = circuitBreaker.getState().toString();
         }
         return states;
     }

@@ -87,7 +87,7 @@ class PlatformOrchestrator extends events_1.EventEmitter {
     startHealthMonitoring() {
         this.healthCheckInterval = setInterval(() => {
             this.performHealthCheck();
-        }, this.config.monitoring.healthCheckInterval);
+        }, this.config.monitoring.healthChecks.interval);
     }
     async performHealthCheck() {
         for (const [name, component] of Object.entries(this.components)) {
